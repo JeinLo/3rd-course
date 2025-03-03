@@ -1,98 +1,112 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Проект "Комменты"</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="styles.css" />
-  </head>
+</head>
 
-  
 <body>
-  <div class="container">
-      <ul class="comments" id="commentList"></ul>
-      <div class="add-form">
-          <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name">
-          <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4" id="comment"></textarea>
-          <div class="add-form-row">
-              <button class="add-form-button" id="addComment">Написать</button>
-          </div>
-      </div>
-  </div>
+    <div class="container">
+        <ul class="comments" id="commentList"></ul>
+        <div class="add-form">
+            <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name">
+            <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4" id="comment"></textarea>
+            <div class="add-form-row">
+                <button class="add-form-button" id="addComment">Написать</button>
+            </div>
+        </div>
+    </div>
 
-  <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          const nameInput = document.getElementById('name');
-          const commentInput = document.getElementById('comment');
-          const addCommentButton = document.getElementById('addComment');
-          const commentList = document.getElementById('commentList');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameInput = document.getElementById('name');
+            const commentInput = document.getElementById('comment');
+            const addCommentButton = document.getElementById('addComment');
+            const commentList = document.getElementById('commentList');
 
-          let comments = [
-              { name: 'Глеб Фокин', date: '12.02.22 12:18', text: 'Это будет первый комментарий на этой странице', likes: 3, liked: false },
-              { name: 'Варвара Н.', date: '13.02.22 19:22', text: 'Мне нравится как оформлена эта страница!', likes: 75, liked: true }
-          ];
+            let comments = [
+                { name: 'Глеб Фокин', date: '12.02.22 12:18', text: 'Это будет первый комментарий на этой странице', likes: 3, liked: false },
+                { name: 'Варвара Н.', date: '13.02.22 19:22', text: 'Мне нравится как оформлена эта страница!', likes: 75, liked: true }
+            ];
 
-          function renderComments() {
-              commentList.innerHTML = '';
-              comments.forEach((comment, index) => {
-                  const likeClass = comment.liked ? '-active-like' : '';
-                  const commentHTML = `
-                      <li class="comment">
-                          <div class="comment-header">
-                              <div>${comment.name}</div>
-                              <div>${comment.date}</div>
-                          </div>
-                          <div class="comment-body">
-                              <div class="comment-text">
-                                  ${comment.text}
-                              </div>
-                          </div>
-                          <div class="comment-footer">
-                              <div class="likes">
-                                  <span class="likes-counter">${comment.likes}</span>
-                                  <button class="like-button ${likeClass}" data-index="${index}"></button>
-                              </div>
-                          </div>
-                      </li>
-                  `;
-                  commentList.innerHTML += commentHTML;
-              });
+            function renderComments() {
+                commentList.innerHTML = '';
+                comments.forEach((comment, index) => {
+                    const likeClass = comment.liked ? '-active-like' : '';
+                    const commentHTML = `
+                        <li class="comment">
+                            <div class="comment-header">
+                                <div>${escapeHTML(comment.name)}</div>
+                                <div>${comment.date}</div>
+                            </div>
+                            <div class="comment-body" onclick="setReplyToComment(${index})">
+                                <div class="comment-text">
+                                    ${escapeHTML(comment.text)}
+                                </div>
+                            </div>
+                            <div class="comment-footer">
+                                <div class="likes">
+                                    <span class="likes-counter">${comment.likes}</span>
+                                    <button class="like-button ${likeClass}" data-index="${index}"></button>
+                                </div>
+                            </div>
+                        </li>
+                        `;
+                    commentList.innerHTML += commentHTML;
+                });
 
-              document.querySelectorAll('.like-button').forEach(button => {
-                  button.addEventListener('click', (event) => {
-                      const index = event.target.getAttribute('data-index');
-                      toggleLike(index);
-                  });
-              });
-          }
+                document.querySelectorAll('.like-button').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const index = event.target.getAttribute('data-index');
+                        toggleLike(index);
+                    });
+                });
+            }
 
-          function toggleLike(index) {
-              const comment = comments[index];
-              comment.liked = !comment.liked; 
-              comment.likes += comment.liked ? 1 : -1; 
-              renderComments(); 
-          }
+            function toggleLike(index) {
+                const comment = comments[index];
+                comment.liked = !comment.liked; 
+                comment.likes += comment.liked ? 1 : -1; 
+                renderComments(); 
+            }
 
-          addCommentButton.addEventListener('click', () => {
-              const name = nameInput.value.trim();
-              const comment = commentInput.value.trim();
+            window.setReplyToComment = function(index) {
+                const comment = comments[index];
+                nameInput.value = comment.name + ': ';
+                commentInput.value = comment.text + ' ';
+                commentInput.focus();
+            };
 
-              if (!name || !comment) {
-                  alert('Пожалуйста, заполните оба поля.');
-                  return;
-              }
+            addCommentButton.addEventListener('click', () => {
+                const name = nameInput.value.trim();
+                const comment = commentInput.value.trim();
 
-              const currentDateTime = new Date();
-              const formattedDate = currentDateTime.toLocaleString();
+                if (!name || !comment) {
+                    alert('Пожалуйста, заполните оба поля.');
+                    return;
+                }
 
-              comments.push({ name, date: formattedDate, text: comment, likes: 0, liked: false });
-              nameInput.value = '';
-              commentInput.value = '';
-              renderComments(); 
-          });
+                const currentDateTime = new Date();
+                const formattedDate = currentDateTime.toLocaleString();
 
-       
-          renderComments();
-      });
-  </script>
+                comments.push({ name: name, date: formattedDate, text: comment, likes: 0, liked: false });
+                nameInput.value = '';
+                commentInput.value = '';
+                renderComments(); 
+            });
+
+            function escapeHTML(html) {
+                return html
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#39;');
+            }
+
+            renderComments();
+        });
+    </script>
 </body>
 </html>
