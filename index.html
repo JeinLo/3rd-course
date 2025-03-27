@@ -1,23 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-  <head>
-    <title>Проект "Комменты"</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+    <head>
+        <title>Проект "Комменты"</title>
+        <meta
+            charset="utf-8"
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
 
-  <body>
-    <div class="container">
-      <ul class="comments"></ul>
-      <div class="add-form">
-        <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-        <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
-        <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+    <body>
+        <div class="container">
+            <ul class="comments" id="commentList"></ul>
+            <div class="add-form">
+                <input
+                    type="text"
+                    class="add-form-name"
+                    placeholder="Введите ваше имя"
+                    id="name"
+                />
+                <textarea
+                    class="add-form-text"
+                    placeholder="Введите ваш комментарий"
+                    rows="4"
+                    id="comment"
+                ></textarea>
+                <div class="add-form-row">
+                    <button class="add-form-button" id="addComment">
+                        Написать
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <script type="module" src="./app.js"></script>
-  </body>
+        <script type="module" src="js/main.js"></script>
+    </body>
 </html>
