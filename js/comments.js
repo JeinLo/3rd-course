@@ -13,4 +13,4 @@ export const comments = [
         likes: 75,
         liked: true,
     },
-];
+]
