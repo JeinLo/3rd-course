@@ -1,9 +1,10 @@
-import { comments } from './comments.js';
-import { toggleLike } from './likeToggle.js';
 import { escapeHTML } from './escapeHTML.js';
+import { initListenerLikes, initListenerReplyToComment } from './listeners.js';
 
-export function renderComments(commentList, nameInput, commentInput) {
+export function renderComments(comments) {
+    const commentList = document.getElementById('commentList');
     commentList.innerHTML = '';
+
     comments.forEach((comment, index) => {
         const likeClass = comment.liked ? '-active-like' : '';
         const commentHTML = `
@@ -12,8 +13,8 @@ export function renderComments(commentList, nameInput, commentInput) {
                     <div>${escapeHTML(comment.name)}</div>
                     <div>${comment.date}</div>
                 </div>
-                <div class="comment-body" onclick="setReplyToComment(${index})">
-                    <div class="comment-text">
+                <div class="comment-body">
+                    <div class="comment-text" data-index="${index}">
                         ${escapeHTML(comment.text)}
                     </div>
                 </div>
@@ -28,17 +29,6 @@ export function renderComments(commentList, nameInput, commentInput) {
         commentList.innerHTML += commentHTML;
     });
 
-    // Пример использования nameInput и commentInput
-    if (nameInput && commentInput) {
-        // Можно, например, добавить логику для отображения текущих значений
-        console.log('Current Name Input:', nameInput.value);
-        console.log('Current Comment Input:', commentInput.value);
-    }
-
-    document.querySelectorAll('.like-button').forEach((button) => {
-        button.addEventListener('click', (event) => {
-            const index = event.target.getAttribute('data-index');
-            toggleLike(index, commentList);
-        });
-    });
+    initListenerLikes();
+    initListenerReplyToComment();
 }

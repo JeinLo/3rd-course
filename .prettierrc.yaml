@@ -1,8 +1,6 @@
 {
-    'semi': false,
-    'singleQuote': true,
-    'tabWidth': 4,
-    'trailingComma': 'es5',
-    'endOfLine': 'lf',
-    'parser': 'flow',
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5"
 }
