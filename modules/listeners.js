@@ -1,77 +1,89 @@
-import { renderComments } from './render.js';
-import { escapeHTML } from './escapeHTML.js';
-import { comments } from './comments.js';
+import { comments } from './comments.js'; 
+import { renderComments } from './render.js'; 
+import { escapeHTML } from './utils.js'; 
 
-export function initListenerAddComment(comments) {
-    const nameInput = document.getElementById('name');
-    const commentInput = document.getElementById('comment');
-    const addCommentButton = document.getElementById('addComment');
-
+export function initListenerAddComment() {
+    const addCommentButton = document.getElementById('addCommentButton');
     addCommentButton.addEventListener('click', () => {
-        const name = nameInput.value.trim();
-        const comment = commentInput.value.trim();
-
-        if (!name || !comment) {
-            alert('Пожалуйста, заполните оба поля.');
-            return;
-        }
-
-        const currentDateTime = new Date();
-        const formattedDate = currentDateTime.toLocaleString();
+        const nameInput = document.getElementById('name');
+        const commentInput = document.getElementById('comment');
 
         comments.push({
-            name: escapeHTML(name),
-            date: formattedDate,
-            text: escapeHTML(comment),
+            name: escapeHTML(nameInput.value),
+            date: new Date().toLocaleString(),
+            text: escapeHTML(commentInput.value),
             likes: 0,
-            liked: false,
+            liked: false
         });
 
         nameInput.value = '';
         commentInput.value = '';
-        renderComments(comments);
-    });
-}
-
-export function initListenerLikes() {
-    const commentList = document.getElementById('commentList');
-
-    commentList.addEventListener('click', (event) => {
-        const button = event.target.closest('.like-button');
-        if (button) {
-            const index = button.getAttribute('data-index');
-            toggleLike(index);
-        }
-    });
-}
-
-function toggleLike(index) {
-    const comment = comments[index];
-    comment.liked = !comment.liked;
-    comment.likes += comment.liked ? 1 : -1;
-    renderComments(comments);
+        renderComments();
 }
 
 export function initListenerReplyToComment() {
-    const commentList = document.getElementById('commentList');
+   const commentList = document.getElementById('commentList');
 
-    commentList.addEventListener('click', (event) => {
-        const commentElement = event.target.closest('.comment-body');
-        if (commentElement) {
-            const index = commentElement
-                .querySelector('.comment-text')
-                .getAttribute('data-index');
-            setReplyToComment(index);
-        }
-    });
+   commentList.addEventListener('click', (event) => {
+       const commentElement = event.target.closest('.comment');
+       if (commentElement) {
+           const index = commentElement.getAttribute('data-index');
+           const comment = comments[index];
+           const nameInput = document.getElementById('name');
+           const commentInput = document.getElementById('comment');
+
+           commentInput.value = `${comment.name}: "${comment.text}" `;
+           nameInput.value = ''; 
+           commentInput.focus();
+       }
+   });
 }
 
-function setReplyToComment(index) {
-    const comment = comments[index];
-    const nameInput = document.getElementById('name');
-    const commentInput = document.getElementById('comment');
+export function initListenerLikes() {
+   const commentList = document.getElementById('commentList');
 
-    nameInput.value = comment.name + ': ';
-    commentInput.value = comment.text + ' ';
-    commentInput.focus();
+   commentList.addEventListener('click', (event) => {
+       if (event.target.classList.contains('like-button')) {
+           const index = event.target.getAttribute('data-index');
+           toggleLike(index);
+       }
+   });
 }
+//Лайки
+function toggleLike(index) {
+   const comment = comments[index];
+   const wasLiked = comment.liked; 
+   comment.liked = !comment.liked;
+   comment.likes += comment.liked ? 1 : -1; 
+
+   if (wasLiked !== comment.liked) {
+      renderComments(); 
+  }
+}
+
+function renderComments() {
+  const commentsContainer = document.getElementById('comments-container');
+  commentsContainer.innerHTML = ''; 
+
+  comments.forEach((comment, index) => {
+      const commentElement = document.createElement('div');
+      commentElement.className = 'comment';
+      commentElement.innerHTML = `
+          <strong>${escapeHTML(comment.name)}</strong>
+          <p>${escapeHTML(comment.text)}</p>
+          <small>${comment.date}</small>
+          <button class="like-button" data-index="${index}">
+              ${comment.liked ? '❤️' : '🤍'} ${comment.likes}
+          </button>
+          <button onclick="editComment(${index})">Изменить</button>
+      `;
+      commentsContainer.appendChild(commentElement);
+  });
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+   renderComments(); 
+   initListenerLikes(); 
+});
+
