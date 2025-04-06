@@ -1,9 +1,9 @@
-import { comments } from './comments.js';
-import { escapeHTML } from './utils.js';
+import { comments } from './comments.js'
+import { escapeHTML } from './utils.js'
 
 export function renderComments() {
-    const commentList = document.getElementById('commentList');
-    commentList.innerHTML = '';
+    const commentList = document.getElementById('commentList')
+    commentList.innerHTML = ''
 
     comments.forEach((comment, index) => {
         const commentHTML = `
@@ -24,10 +24,10 @@ export function renderComments() {
                     </div>
                 </div>
             </li>
-        `;
-        commentList.innerHTML += commentHTML;
-    });
+        `
+        commentList.innerHTML += commentHTML
+    })
 
-    initListenerLikes();
-    initListenerReplyToComment();
+    initListenerLikes(renderComments)
+    initListenerReplyToComment()
 }

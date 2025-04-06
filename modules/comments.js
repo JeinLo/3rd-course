@@ -1,4 +1,4 @@
-export const comments = [
+export let comments = [
     {
         name: 'Глеб Фокин',
         date: '12.02.22 12:18',
@@ -13,4 +13,4 @@ export const comments = [
         likes: 75,
         liked: true,
     },
-]
+];

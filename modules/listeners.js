@@ -82,7 +82,7 @@ function renderComments() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+{
     renderComments();
     initListenerLikes();
-});
+}
