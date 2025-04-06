@@ -1,12 +1,12 @@
 import { comments } from './comments.js'
+import { initLikeListeners, initListenerReplyToComment } from './listeners.js'
 import { escapeHTML } from './utils.js'
 
-export function renderComments() {
-    const commentList = document.getElementById('commentList')
-    commentList.innerHTML = ''
+export const renderComments = () => {
+    const commentList = document.querySelectorAll('.comments')
 
-    comments.forEach((comment, index) => {
-        const commentHTML = `
+    commentList.innerHTML = comments.forEach((comment, index) => {
+        return `
             <li class="comment" data-index="${index}">
                 <div class="comment-header">
                     <div>${escapeHTML(comment.name)}</div>
@@ -20,14 +20,13 @@ export function renderComments() {
                 <div class="comment-footer">
                     <div class="likes">
                         <span class="likes-counter">${comment.likes}</span>
-                        <button class="like-button" data-index="${index}"></button>
+                        <button data-index="${index}" class="like-button ${comment.isLiked ? 'active-like' : ''}"> </button>
                     </div>
                 </div>
             </li>
         `
-        commentList.innerHTML += commentHTML
     })
 
-    // initListenerLikes(renderComments)
-    //initListenerReplyToComment()
+    initLikeListeners(renderComments)
+    initListenerReplyToComment()
 }

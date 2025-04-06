@@ -2,62 +2,67 @@ import { comments } from './comments.js'
 import { renderComments } from './render.js'
 import { escapeHTML } from './utils.js'
 
-export function initListenerAddComment() {
-    const addCommentButton = document.getElementById('addComment')
-    addCommentButton.addEventListener('click', () => {
-        const nameInput = document.getElementById('name')
-        const commentInput = document.getElementById('comment')
+export function initListenerReplyToComment() {
+    const commentsElements = document.querySelectorAll('.comment')
 
-        comments.push({
-            name: escapeHTML(nameInput.value),
+    for (const comment of commentsElements) {
+        comment.addEventListener('click', (event) => {
+            const index = event.currentTarget.dataset.index
+            const currentComment = comments[index]
+            const name = currentComment.name
+            const text = currentComment.text
+
+            const input = document.getElementById('comment')
+            input.value = `${name} - ${text}`
+        })
+    }
+}
+
+export const initLikeListeners = (renderComments) => {
+    const likeButtons = document.querySelectorAll('.like-button')
+
+    for (const likeButton of likeButtons) {
+        likeButton.addEventListener('click', (event) => {
+            event.stopPropagation()
+
+            const index = likeButton.dataset.index
+            const comment = comments[index]
+
+            comment.likes - comment.isLiked
+                ? comment.likes - 1
+                : comment.likes + 1
+
+            comment.isLikedlikes = !comment.isLiked
+
+            renderComments()
+        })
+    }
+}
+
+export const initListenerAddComment = () => {
+    const name = document.getElementById('name-input')
+    const text = document.getElementById('text-input')
+
+    const addButton = document.querySelector('.add-form-button')
+
+    addButton.addEventListener('click', () => {
+        if (!name.value || !text.value) {
+            console.error('Заполните форму')
+        }
+
+        const newComment = {
+            name: escapeHTML(name.value),
             date: new Date().toLocaleString(),
-            text: escapeHTML(commentInput.value),
+            text: escapeHTML(text.value),
             likes: 0,
             liked: false,
-        })
-
-        nameInput.value = ''
-        commentInput.value = ''
-        renderComments()
-    })
-}
-
-export function initListenerReplyToComment() {
-    const commentList = document.getElementById('commentList')
-
-    commentList.addEventListener('click', (event) => {
-        const commentElement = event.target.closest('.comment')
-        if (commentElement) {
-            const index = commentElement.getAttribute('data-index')
-            const comment = comments[index]
-            const nameInput = document.getElementById('name')
-            const commentInput = document.getElementById('comment')
-
-            commentInput.value = `${comment.name}: "${comment.text}" `
-            nameInput.value = ''
-            commentInput.focus()
         }
-    })
-}
 
-export function initListenerLikes() {
-    const commentList = document.getElementById('commentList')
+        comments.push(newComment)
 
-    commentList.addEventListener('click', (event) => {
-        if (event.target.classList.contains('like-button')) {
-            const index = event.target.getAttribute('data-index')
-            toggleLike(index)
-        }
-    })
-}
-//Лайки
-function toggleLike(index) {
-    const comment = comments[index]
-    const wasLiked = comment.liked
-    comment.liked = !comment.liked
-    comment.likes += comment.liked ? 1 : -1
-
-    if (wasLiked !== comment.liked) {
         renderComments()
-    }
+
+        name.value = ''
+        text.value = ''
+    })
 }
