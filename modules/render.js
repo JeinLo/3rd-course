@@ -28,6 +28,6 @@ export function renderComments() {
         commentList.innerHTML += commentHTML
     })
 
-    initListenerLikes(renderComments)
-    initListenerReplyToComment()
+    // initListenerLikes(renderComments)
+    //initListenerReplyToComment()
 }
