@@ -1,14 +1,33 @@
+import { comments } from './comments.js'
 import { getCurrentDateTime } from './utils.js'
 import { sanitizeHTML } from './sanitize.js'
 import { renderComments } from './render.js'
 
-export function addComment(nameInput, commentInput, commentList, comments) {
+export function addComment() {
+    const nameInput = document.querySelector('.add-form-name')
+    const commentInput = document.querySelector('.add-form-text')
+    const commentList = document.querySelector('.comments')
+
+    console.log('addComment called with comments:', comments)
+
+    if (!nameInput || !commentInput || !commentList) {
+        console.error('Invalid DOM elements in addComment:', {
+            nameInput,
+            commentInput,
+            commentList,
+        })
+        return
+    }
+
     const name = sanitizeHTML(nameInput.value.trim())
+    console.log('After sanitizeHTML (name):', name)
+
     const text = sanitizeHTML(commentInput.value.trim())
+    console.log('After sanitizeHTML (text):', text)
 
     if (!name || !text) {
         alert('Пожалуйста, заполните оба поля!')
-        return comments
+        return
     }
 
     const newComment = {
@@ -19,12 +38,14 @@ export function addComment(nameInput, commentInput, commentList, comments) {
         isLiked: false,
     }
 
+    console.log('New comment:', newComment)
+
     comments.push(newComment)
 
     nameInput.value = ''
     commentInput.value = ''
 
-    renderComments(commentList, commentInput, nameInput)
+    console.log('Comments after push:', comments)
 
-    return comments
+    renderComments()
 }

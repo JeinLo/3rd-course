@@ -1,17 +1,25 @@
 import { comments } from './comments.js'
+import { addComment } from './addComment.js'
 import { renderComments } from './render.js'
 
-export function addEventListeners(
-    commentList,
-    nameInput,
-    commentInput,
-    renderCommentsFunc,
-) {
-    initListenerReplyToComment(commentList, commentInput)
-    initLikeListeners(commentList, renderCommentsFunc, commentInput, nameInput)
+export function initAddCommentListener() {
+    const addButton = document.querySelector('.add-form-button')
+
+    if (!addButton) {
+        console.error('Add button not found!')
+        return
+    }
+
+    addButton.addEventListener('click', () => {
+        console.log('Button clicked!')
+        addComment()
+    })
 }
 
-export function initListenerReplyToComment(commentList, commentInput) {
+export function initListenerReplyToComment() {
+    const commentList = document.querySelector('.comments')
+    const commentInput = document.querySelector('.add-form-text')
+
     const commentsElements = commentList.querySelectorAll('.comment')
 
     for (const comment of commentsElements) {
@@ -26,12 +34,9 @@ export function initListenerReplyToComment(commentList, commentInput) {
     }
 }
 
-export function initLikeListeners(
-    commentList,
-    renderCommentsFunc,
-    commentInput,
-    nameInput,
-) {
+export function initLikeListeners() {
+    const commentList = document.querySelector('.comments')
+
     const likeButtons = commentList.querySelectorAll('.like-button')
 
     for (const likeButton of likeButtons) {
@@ -48,7 +53,7 @@ export function initLikeListeners(
             }
             comment.isLiked = !comment.isLiked
 
-            renderCommentsFunc(commentList, commentInput, nameInput)
+            renderComments()
         })
     }
 }
