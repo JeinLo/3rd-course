@@ -5,14 +5,8 @@ import { renderComments } from './render.js'
 export function initAddCommentListener() {
     const addButton = document.querySelector('.add-form-button')
 
-    if (!addButton) {
-        console.error('Add button not found!')
-        return
-    }
-
-    addButton.addEventListener('click', () => {
-        console.log('Button clicked!')
-        addComment()
+    addButton.addEventListener('click', async () => {
+        await addComment()
     })
 }
 
@@ -36,7 +30,6 @@ export function initListenerReplyToComment() {
 
 export function initLikeListeners() {
     const commentList = document.querySelector('.comments')
-
     const likeButtons = commentList.querySelectorAll('.like-button')
 
     for (const likeButton of likeButtons) {
