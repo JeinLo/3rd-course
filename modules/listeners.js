@@ -6,6 +6,7 @@ export function initAddCommentListener() {
     const addButton = document.querySelector('.add-form-button')
 
     addButton.addEventListener('click', async () => {
+        console.log('Кнопка "Написать" нажата')
         await addComment()
     })
 }
@@ -32,19 +33,31 @@ export function initLikeListeners() {
     const commentList = document.querySelector('.comments')
     const likeButtons = commentList.querySelectorAll('.like-button')
 
+    console.log('Найдено кнопок лайков:', likeButtons.length)
+
     for (const likeButton of likeButtons) {
         likeButton.addEventListener('click', (event) => {
             event.stopPropagation()
 
-            const index = likeButton.dataset.index
+            const index = parseInt(likeButton.dataset.index, 10)
+            console.log('Клик по кнопке лайка, индекс:', index)
+
             const comment = comments[index]
+            if (!comment) {
+                console.error('Комментарий не найден по индексу:', index)
+                return
+            }
 
             if (comment.isLiked) {
                 comment.likes -= 1
+                comment.isLiked = false
             } else {
                 comment.likes += 1
+                comment.isLiked = true
             }
-            comment.isLiked = !comment.isLiked
+
+            console.log('Обновленный комментарий:', comment)
+            console.log('Массив comments:', comments)
 
             renderComments()
         })
