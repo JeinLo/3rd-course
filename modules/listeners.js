@@ -42,6 +42,11 @@ export function initLikeListeners() {
             const index = parseInt(likeButton.dataset.index, 10)
             console.log('Клик по кнопке лайка, индекс:', index)
 
+            if (isNaN(index) || index < 0 || index >= comments.length) {
+                console.error('Неверный индекс для комментария:', index)
+                return
+            }
+
             const comment = comments[index]
             if (!comment) {
                 console.error('Комментарий не найден по индексу:', index)

@@ -22,48 +22,31 @@ export async function fetchComments() {
         console.log('Данные от API (GET):', data)
 
         if (!data.comments || !Array.isArray(data.comments)) {
-            throw new Error(
-                'Поле comments отсутствует или не является массивом',
+            console.warn(
+                'Поле comments отсутствует или не является массивом, используем текущие комментарии',
             )
+        } else {
+            const formattedComments = data.comments.map((comment, index) => {
+                console.log(`Обрабатываем комментарий ${index}:`, comment)
+                return {
+                    name: comment.author?.name || 'Anonymous',
+                    date: comment.date || getCurrentDateTime(),
+                    text: comment.text || '',
+                    likes: comment.likes || 0,
+                    isLiked: false,
+                }
+            })
+
+            const oldComments = [...comments]
+            comments.length = 0
+            comments.push(...oldComments, ...formattedComments)
+            console.log('Обновленный массив комментариев:', comments)
         }
 
-        const formattedComments = data.comments.map((comment, index) => {
-            console.log(`Обрабатываем комментарий ${index}:`, comment)
-            return {
-                name: comment.author?.name || 'Anonymous',
-                date: comment.date || getCurrentDateTime(),
-                text: comment.text || '',
-                likes: comment.likes || 0,
-                isLiked: false,
-            }
-        })
-
-        comments.length = 0
-        comments.push(...formattedComments)
-        console.log('Форматированные комментарии:', formattedComments)
-
-        return formattedComments
+        return comments
     } catch (error) {
         console.error('Ошибка при загрузке комментариев:', error.message)
-        const localComments = [
-            {
-                name: 'Глеб Фокин',
-                date: '12.02.22 12:18',
-                text: 'Это будет первый комментарий на этой странице',
-                likes: 3,
-                isLiked: false,
-            },
-            {
-                name: 'Варвара Н.',
-                date: '13.02.22 19:22',
-                text: 'Мне нравится как оформлена эта страница! ❤',
-                likes: 75,
-                isLiked: true,
-            },
-        ]
-        comments.length = 0
-        comments.push(...localComments)
-        return localComments
+        return comments
     }
 }
 
@@ -75,23 +58,24 @@ export async function postComment(comment) {
             'с данными:',
             comment,
         )
+
+        const params = new URLSearchParams()
+        params.append('text', comment.text)
+        params.append('author', comment.name)
+        params.append('forceError', 'false')
+
+        console.log('Данные в формате URLSearchParams:', params.toString())
+
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text: comment.text,
-                author: comment.name,
-                forceError: false,
-            }),
+            body: params,
         })
 
         console.log('Ответ от API (POST):', response)
 
         if (!response.ok) {
-            const errorData = await response.json()
-            console.log('Тело ответа с ошибкой:', errorData)
+            const errorData = await response.text()
+            console.log('Тело ответа с ошибкой (текст):', errorData)
             throw new Error(
                 `Ошибка при добавлении комментария: ${response.status} ${response.statusText}`,
             )

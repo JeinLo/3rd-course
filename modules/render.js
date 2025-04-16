@@ -4,6 +4,11 @@ import { initLikeListeners, initListenerReplyToComment } from './listeners.js'
 export function renderComments() {
     const commentList = document.querySelector('.comments')
 
+    if (!commentList) {
+        console.error('Элемент .comments не найден в DOM')
+        return
+    }
+
     commentList.innerHTML = comments
         .map(
             (comment, index) => `
