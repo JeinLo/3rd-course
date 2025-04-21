@@ -1,43 +1,22 @@
-import { comments } from './comments.js'
 import { postComment } from './api.js'
 import { renderComments } from './render.js'
+import { sanitizeHTML } from './sanitize.js'
 
-export async function addComment() {
-    console.log('Функция addComment вызвана')
+export async function addComment(nameInput, commentInput, commentList) {
+    const name = sanitizeHTML(nameInput.value.trim())
+    const text = sanitizeHTML(commentInput.value.trim())
 
-    const nameInput = document.querySelector('.add-form-name')
-    const commentInput = document.querySelector('.add-form-text')
-
-    const name = nameInput.value.trim()
-    const text = commentInput.value.trim()
-
-    console.log('Введенные данные:', { name, text })
-
-    if (!name || !text) {
-        console.log('Поля не заполнены, показываем alert')
-        alert('Пожалуйста, заполните оба поля!')
+    if (name.length < 3 || text.length < 3) {
+        alert('Имя и текст должны содержать минимум 3 символа')
         return
     }
 
-    const newComment = {
-        name,
-        text,
-        likes: 0,
-        isLiked: false,
-    }
-
-    console.log('Создан новый комментарий:', newComment)
-
     try {
-        console.log('Вызываем postComment для отправки комментария в API')
-        await postComment(newComment)
-        console.log('Комментарий успешно добавлен, очищаем поля ввода')
+        await postComment(text, name)
         nameInput.value = ''
         commentInput.value = ''
-        console.log('Перерисовываем список комментариев')
-        renderComments()
+        renderComments(commentList, commentInput, nameInput)
     } catch (error) {
-        console.error('Ошибка при добавлении комментария:', error.message)
-        alert('Не удалось добавить комментарий. Попробуйте позже.')
+        alert(error.message || 'Не удалось отправить комментарий')
     }
 }
