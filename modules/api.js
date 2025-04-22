@@ -59,16 +59,12 @@ export async function postComment(comment) {
             comment,
         )
 
-        const params = new URLSearchParams()
-        params.append('text', comment.text)
-        params.append('author', comment.name)
-        params.append('forceError', 'false')
-
-        console.log('Данные в формате URLSearchParams:', params.toString())
+        const body = `text=${encodeURIComponent(comment.text)}&author=${encodeURIComponent(comment.name)}&forceError=false`
+        console.log('Тело запроса (строка):', body)
 
         const response = await fetch(`${host}/comments`, {
             method: 'POST',
-            body: params,
+            body: body,
         })
 
         console.log('Ответ от API (POST):', response)
