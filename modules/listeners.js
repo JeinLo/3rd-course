@@ -1,20 +1,36 @@
 import { comments } from './comments.js'
-import { addComment } from './addComment.js'
+import { postComment } from './api.js'
 import { renderComments } from './render.js'
 
-export function initAddCommentListener() {
+export function initAddCommentListener(commentList, commentInput, nameInput) {
     const addButton = document.querySelector('.add-form-button')
 
     addButton.addEventListener('click', async () => {
         console.log('Кнопка "Написать" нажата')
-        await addComment()
+
+        const name = nameInput.value.trim()
+        const text = commentInput.value.trim()
+
+        if (name.length < 3 || text.length < 3) {
+            alert('Имя и текст должны содержать минимум 3 символа')
+            return
+        }
+
+        postComment(text, name)
+            .then(() => {
+                renderComments(commentList, commentInput, nameInput)
+                nameInput.value = ''
+                commentInput.value = ''
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error)
+                alert(error.message || 'Не удалось отправить комментарий')
+                renderComments(commentList, commentInput, nameInput)
+            })
     })
 }
 
-export function initListenerReplyToComment() {
-    const commentList = document.querySelector('.comments')
-    const commentInput = document.querySelector('.add-form-text')
-
+export function initListenerReplyToComment(commentList, commentInput) {
     commentList.addEventListener('click', (event) => {
         const commentElement = event.target.closest('.comment')
         if (commentElement) {
@@ -28,9 +44,7 @@ export function initListenerReplyToComment() {
     })
 }
 
-export function initLikeListeners() {
-    const commentList = document.querySelector('.comments')
-
+export function initLikeListeners(commentList, commentInput, nameInput) {
     commentList.addEventListener('click', (event) => {
         const likeButton = event.target.closest('.like-button')
         if (likeButton) {
@@ -61,7 +75,7 @@ export function initLikeListeners() {
             console.log('Обновленный комментарий:', comment)
             console.log('Массив comments:', comments)
 
-            renderComments()
+            renderComments(commentList, commentInput, nameInput)
         }
     })
 }

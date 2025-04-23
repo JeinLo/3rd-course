@@ -3,105 +3,77 @@ import { getCurrentDateTime } from './utils.js'
 
 const host = 'https://wedev-api.sky.pro/api/v1/baranova-evgeniya'
 
-export async function fetchComments() {
-    try {
-        console.log('Отправляем GET-запрос на:', `${host}/comments`)
-        const response = await fetch(`${host}/comments`, {
-            method: 'GET',
+export const fetchComments = () => {
+    return fetch(`${host}/comments`, {
+        method: 'GET',
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(
+                    `Ошибка при загрузке комментариев: ${res.status}`,
+                )
+            }
+            return res.json()
         })
+        .then((responseData) => {
+            console.log('Comments from server:', responseData.comments)
 
-        console.log('Ответ от API (GET):', response)
-
-        if (!response.ok) {
-            throw new Error(
-                `Ошибка при загрузке комментариев: ${response.status} ${response.statusText}`,
-            )
-        }
-
-        const data = await response.json()
-        console.log('Данные от API (GET):', data)
-
-        if (!data.comments || !Array.isArray(data.comments)) {
-            console.warn(
-                'Поле comments отсутствует или не является массивом, используем текущие комментарии',
-            )
-        } else {
-            const formattedComments = data.comments.map((comment, index) => {
-                console.log(`Обрабатываем комментарий ${index}:`, comment)
-                return {
-                    name: comment.author?.name || 'Anonymous',
-                    date: comment.date || getCurrentDateTime(),
-                    text: comment.text || '',
-                    likes: comment.likes || 0,
-                    isLiked: false,
-                }
-            })
+            const formattedComments = responseData.comments.map((comment) => ({
+                name: comment.author?.name || 'Anonymous',
+                date: comment.date || getCurrentDateTime(),
+                text: comment.text || '',
+                likes: comment.likes || 0,
+                isLiked: comment.isLiked || false,
+            }))
 
             const oldComments = [...comments]
             comments.length = 0
             comments.push(...oldComments, ...formattedComments)
             console.log('Обновленный массив комментариев:', comments)
-        }
 
-        return comments
-    } catch (error) {
-        console.error('Ошибка при загрузке комментариев:', error.message)
-        return comments
-    }
+            return comments
+        })
+        .catch((error) => {
+            console.error('Ошибка загрузки:', error)
+            return comments
+        })
 }
 
-export async function postComment(comment) {
-    try {
-        console.log(
-            'Отправляем POST-запрос на:',
-            `${host}/comments`,
-            'с данными:',
-            comment,
-        )
-
-        const body = `text=${encodeURIComponent(comment.text)}&author=${encodeURIComponent(comment.name)}&forceError=false`
-        console.log('Тело запроса (строка):', body)
-
-        const response = await fetch(`${host}/comments`, {
-            method: 'POST',
-            body: body,
+export const postComment = (text, name) => {
+    console.log('API sending:', { text, name })
+    return fetch(`${host}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({
+            text,
+            name,
+        }),
+    })
+        .then(async (res) => {
+            if (!res.ok) {
+                if (res.status === 400) {
+                    const errorData = await res.json()
+                    console.log('Server error response:', errorData)
+                    throw new Error(errorData.error)
+                }
+                throw new Error(
+                    `Ошибка сервера при отправке комментария: ${res.status}`,
+                )
+            }
+            return res.json()
         })
-
-        console.log('Ответ от API (POST):', response)
-
-        if (!response.ok) {
-            const errorData = await response.text()
-            console.log('Тело ответа с ошибкой (текст):', errorData)
-            throw new Error(
-                `Ошибка при добавлении комментария: ${response.status} ${response.statusText}`,
-            )
-        }
-
-        const data = await response.json()
-        console.log('Данные от API после POST:', data)
-
-        const newComment = {
-            name: data.author?.name || data.name || 'Anonymous',
-            date: data.date || getCurrentDateTime(),
-            text: data.text || '',
-            likes: 0,
-            isLiked: false,
-        }
-
-        comments.push(newComment)
-        console.log('Добавленный комментарий:', newComment)
-
-        return newComment
-    } catch (error) {
-        console.error('Ошибка при добавлении комментария:', error.message)
-        const newComment = {
-            name: comment.name,
-            date: getCurrentDateTime(),
-            text: comment.text,
-            likes: 0,
-            isLiked: false,
-        }
-        comments.push(newComment)
-        return newComment
-    }
+        .then(() => {
+            return fetchComments()
+        })
+        .catch((error) => {
+            console.error('Ошибка отправки:', error)
+            const newComment = {
+                name: name,
+                date: getCurrentDateTime(),
+                text: text,
+                likes: 0,
+                isLiked: false,
+            }
+            comments.push(newComment)
+            return comments
+        })
 }
