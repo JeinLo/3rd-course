@@ -18,14 +18,13 @@ export function initAddCommentListener(commentList, commentInput, nameInput) {
 
         postComment(text, name)
             .then(() => {
-                renderComments(commentList, commentInput, nameInput)
+                renderComments(commentList)
                 nameInput.value = ''
                 commentInput.value = ''
             })
             .catch((error) => {
                 console.error('Ошибка:', error)
                 alert(error.message || 'Не удалось отправить комментарий')
-                renderComments(commentList, commentInput, nameInput)
             })
     })
 }
@@ -44,7 +43,7 @@ export function initListenerReplyToComment(commentList, commentInput) {
     })
 }
 
-export function initLikeListeners(commentList, commentInput, nameInput) {
+export function initLikeListeners(commentList) {
     commentList.addEventListener('click', (event) => {
         const likeButton = event.target.closest('.like-button')
         if (likeButton) {
@@ -75,7 +74,7 @@ export function initLikeListeners(commentList, commentInput, nameInput) {
             console.log('Обновленный комментарий:', comment)
             console.log('Массив comments:', comments)
 
-            renderComments(commentList, commentInput, nameInput)
+            renderComments(commentList)
         }
     })
 }

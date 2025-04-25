@@ -26,16 +26,22 @@ export const fetchComments = () => {
                 isLiked: comment.isLiked || false,
             }))
 
-            const oldComments = [...comments]
-            comments.length = 0
-            comments.push(...oldComments, ...formattedComments)
+            const existingCommentsSet = new Set(
+                comments.map((c) => `${c.name}:${c.date}:${c.text}`),
+            )
+            const newComments = formattedComments.filter((comment) => {
+                const commentKey = `${comment.name}:${comment.date}:${comment.text}`
+                return !existingCommentsSet.has(commentKey)
+            })
+
+            comments.push(...newComments)
             console.log('Обновленный массив комментариев:', comments)
 
             return comments
         })
         .catch((error) => {
             console.error('Ошибка загрузки:', error)
-            return comments
+            throw error
         })
 }
 
@@ -66,14 +72,6 @@ export const postComment = (text, name) => {
         })
         .catch((error) => {
             console.error('Ошибка отправки:', error)
-            const newComment = {
-                name: name,
-                date: getCurrentDateTime(),
-                text: text,
-                likes: 0,
-                isLiked: false,
-            }
-            comments.push(newComment)
-            return comments
+            throw error
         })
 }

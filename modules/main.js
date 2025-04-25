@@ -1,8 +1,7 @@
 console.log('main.js loaded successfully')
 
-import { fetchComments, postComment } from './api.js'
+import { fetchComments } from './api.js'
 import { renderComments } from './render.js'
-import { comments } from './comments.js'
 import {
     initAddCommentListener,
     initLikeListeners,
@@ -17,16 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const commentList = document.querySelector('.comments')
 
     fetchComments()
-        .then((loadedComments) => {
-            renderComments(commentList, commentInput, nameInput)
+        .then(() => {
+            renderComments(commentList)
             console.log('Event listeners added')
             initAddCommentListener(commentList, commentInput, nameInput)
-            initLikeListeners(commentList, commentInput, nameInput)
+            initLikeListeners(commentList)
             initListenerReplyToComment(commentList, commentInput)
         })
         .catch((error) => {
             console.error('Ошибка загрузки комментариев:', error)
             alert('Не удалось загрузить комментарии')
-            renderComments(commentList, commentInput, nameInput)
         })
 })
