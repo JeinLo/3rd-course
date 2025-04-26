@@ -1,8 +1,15 @@
 import { comments } from './comments.js'
-import { initLikeListeners, initListenerReplyToComment } from './listeners.js'
 
-export function renderComments() {
-    const commentList = document.querySelector('.comments')
+export function renderComments(commentList) {
+    if (!commentList) {
+        console.error('Элемент .comments не найден в DOM')
+        return
+    }
+
+    if (comments.length === 0) {
+        commentList.innerHTML = '<li>Комментариев пока нет</li>'
+        return
+    }
 
     commentList.innerHTML = comments
         .map(
@@ -25,7 +32,4 @@ export function renderComments() {
         `,
         )
         .join('')
-
-    initLikeListeners()
-    initListenerReplyToComment()
 }
