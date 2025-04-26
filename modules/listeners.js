@@ -33,6 +33,12 @@ export function initListenerReplyToComment(commentList, commentInput) {
     commentList.addEventListener('click', (event) => {
         const commentElement = event.target.closest('.comment')
         if (commentElement) {
+            if (event.target.closest('.like-button')) {
+                return
+            }
+
+            event.stopPropagation()
+
             const index = parseInt(commentElement.dataset.index, 10)
             const currentComment = comments[index]
             const name = currentComment.name

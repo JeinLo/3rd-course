@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const commentInput = document.querySelector('.add-form-text')
     const commentList = document.querySelector('.comments')
 
+    renderComments(commentList)
+
     fetchComments()
         .then(() => {
             renderComments(commentList)
@@ -26,5 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch((error) => {
             console.error('Ошибка загрузки комментариев:', error)
             alert('Не удалось загрузить комментарии')
+            renderComments(commentList)
         })
 })
