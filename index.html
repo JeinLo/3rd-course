@@ -8,6 +8,9 @@
     </head>
     <body>
         <div class="container">
+            <div id="loading-indicator" class="hidden">
+                Загрузка комментариев...
+            </div>
             <ul class="comments"></ul>
             <div class="add-form">
                 <input
@@ -21,7 +24,10 @@
                 ></textarea>
                 <button class="add-form-button">Написать</button>
             </div>
+            <div id="loading-message" class="hidden">
+                Комментарий добавляется...
+            </div>
         </div>
-        <script type="module" src="main.js"></script>
+        <script type="module" src="./modules/main.js"></script>
     </body>
 </html>

@@ -2,7 +2,13 @@ import { comments } from './comments.js'
 import { postComment } from './api.js'
 import { renderComments } from './render.js'
 
-export function initAddCommentListener(commentList, commentInput, nameInput) {
+export function initAddCommentListener(
+    commentList,
+    commentInput,
+    nameInput,
+    addForm,
+    loadingMessage,
+) {
     const addButton = document.querySelector('.add-form-button')
 
     addButton.addEventListener('click', async () => {
@@ -16,16 +22,23 @@ export function initAddCommentListener(commentList, commentInput, nameInput) {
             return
         }
 
-        postComment(text, name)
-            .then(() => {
-                renderComments(commentList)
-                nameInput.value = ''
-                commentInput.value = ''
-            })
-            .catch((error) => {
-                console.error('Ошибка:', error)
-                alert(error.message || 'Не удалось отправить комментарий')
-            })
+        addForm.classList.add('hidden')
+        loadingMessage.classList.remove('hidden')
+        addButton.disabled = true
+
+        try {
+            await postComment(text, name)
+            renderComments(commentList)
+            nameInput.value = ''
+            commentInput.value = ''
+        } catch (error) {
+            console.error('Ошибка:', error)
+            alert(error.message || 'Не удалось отправить комментарий')
+        } finally {
+            addForm.classList.remove('hidden')
+            loadingMessage.classList.add('hidden')
+            addButton.disabled = false
+        }
     })
 }
 
