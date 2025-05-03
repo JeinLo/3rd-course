@@ -9,6 +9,9 @@ export const fetchComments = () => {
     })
         .then((res) => {
             if (!res.ok) {
+                if (res.status >= 500 && res.status < 600) {
+                    throw new Error('Ошибка сервера')
+                }
                 throw new Error(
                     `Ошибка при загрузке комментариев: ${res.status}`,
                 )
@@ -22,6 +25,7 @@ export const fetchComments = () => {
                 text: comment.text || '',
                 likes: comment.likes || 0,
                 isLiked: comment.isLiked || false,
+                isLikeLoading: false,
             }))
 
             comments.length = 0
@@ -29,7 +33,14 @@ export const fetchComments = () => {
             return comments
         })
         .catch((error) => {
-            console.error('Ошибка загрузки:', error)
+            if (
+                error.name === 'TypeError' &&
+                error.message.includes('Failed to fetch')
+            ) {
+                throw new Error(
+                    'Кажется, у вас сломался интернет, попробуйте позже',
+                )
+            }
             throw error
         })
 }
@@ -40,21 +51,34 @@ export const postComment = (text, name) => {
         body: JSON.stringify({
             text,
             name,
-        }),
+            forceError: true,
     })
         .then((res) => {
             if (!res.ok) {
-                return res.json().then((errorData) => {
-                    throw new Error(
-                        errorData.error || `Ошибка сервера: ${res.status}`,
-                    )
-                })
+                if (res.status === 400) {
+                    return res.json().then((errorData) => {
+                        throw new Error(
+                            errorData.error || 'Некорректные данные',
+                        )
+                    })
+                }
+                if (res.status >= 500 && res.status < 600) {
+                    throw new Error('Ошибка сервера')
+                }
+                throw new Error(`Ошибка сервера: ${res.status}`)
             }
             return res.json()
         })
         .then(() => fetchComments())
         .catch((error) => {
-            console.error('Ошибка при отправке комментария:', error)
+            if (
+                error.name === 'TypeError' &&
+                error.message.includes('Failed to fetch')
+            ) {
+                throw new Error(
+                    'Кажется, у вас сломался интернет, попробуйте позже',
+                )
+            }
             throw error
         })
 }

@@ -2,6 +2,14 @@ import { comments } from './comments.js'
 import { postComment } from './api.js'
 import { renderComments } from './render.js'
 
+function delay(interval = 300) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, interval)
+    })
+}
+
 export function initAddCommentListener(
     commentList,
     commentInput,
@@ -11,18 +19,16 @@ export function initAddCommentListener(
 ) {
     const addButton = document.querySelector('.add-form-button')
 
-    addButton.addEventListener('click', async () => {
-        console.log('Кнопка "Написать" нажата')
-
+    const handlePostClick = async () => {
         const name = nameInput.value.trim()
         const text = commentInput.value.trim()
 
         if (name.length < 3 || text.length < 3) {
-            alert('Имя и текст должны содержать минимум 3 символа')
+            alert('Имя и комментарий должны быть не короче 3 символов')
             return
         }
 
-        addForm.classList.add('hidden')
+        addForm.style.display = 'none'
         loadingMessage.classList.remove('hidden')
         addButton.disabled = true
 
@@ -32,14 +38,20 @@ export function initAddCommentListener(
             nameInput.value = ''
             commentInput.value = ''
         } catch (error) {
-            console.error('Ошибка:', error)
-            alert(error.message || 'Не удалось отправить комментарий')
+            if (error.message === 'Ошибка сервера') {
+                alert('Сервер сломался, попробуй позже')
+                handlePostClick()
+            } else {
+                alert(error.message || 'Не удалось отправить комментарий')
+            }
         } finally {
-            addForm.classList.remove('hidden')
+            addForm.style.display = 'block'
             loadingMessage.classList.add('hidden')
             addButton.disabled = false
         }
-    })
+    }
+
+    addButton.addEventListener('click', handlePostClick)
 }
 
 export function initListenerReplyToComment(commentList, commentInput) {
@@ -63,37 +75,39 @@ export function initListenerReplyToComment(commentList, commentInput) {
 }
 
 export function initLikeListeners(commentList) {
-    commentList.addEventListener('click', (event) => {
+    commentList.addEventListener('click', async (event) => {
         const likeButton = event.target.closest('.like-button')
         if (likeButton) {
             event.stopPropagation()
 
             const index = parseInt(likeButton.dataset.index, 10)
-            console.log('Клик по кнопке лайка, индекс:', index)
-
             if (isNaN(index) || index < 0 || index >= comments.length) {
                 console.error('Неверный индекс для комментария:', index)
                 return
             }
 
             const comment = comments[index]
-            if (!comment) {
-                console.error('Комментарий не найден по индексу:', index)
+            if (!comment || comment.isLikeLoading) {
                 return
             }
 
-            if (comment.isLiked) {
-                comment.likes -= 1
-                comment.isLiked = false
-            } else {
-                comment.likes += 1
-                comment.isLiked = true
-            }
-
-            console.log('Обновленный комментарий:', comment)
-            console.log('Массив comments:', comments)
-
+            comment.isLikeLoading = true
             renderComments(commentList)
+
+            try {
+                await delay(2000)
+                comment.likes = comment.isLiked
+                    ? comment.likes - 1
+                    : comment.likes + 1
+                comment.isLiked = !comment.isLiked
+                comment.isLikeLoading = false
+                renderComments(commentList)
+            } catch (error) {
+                console.error('Ошибка при обработке лайка:', error)
+                comment.isLikeLoading = false
+                renderComments(commentList)
+                alert('Не удалось обновить лайк')
+            }
         }
     })
 }

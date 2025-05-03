@@ -1,5 +1,3 @@
-console.log('main.js loaded successfully')
-
 import { fetchComments } from './api.js'
 import { renderComments } from './render.js'
 import {
@@ -14,16 +12,22 @@ const loadComments = async (commentList, loadingIndicator) => {
         await fetchComments()
         renderComments(commentList)
     } catch (error) {
-        console.error('Ошибка загрузки комментариев:', error)
-        alert('Не удалось загрузить комментарии')
+        if (error.message === 'Ошибка сервера') {
+            alert('Сервер сломался, попробуй позже')
+        } else if (
+            error.message ===
+            'Кажется, у вас сломался интернет, попробуйте позже'
+        ) {
+            alert(error.message)
+        } else {
+            alert('Не удалось загрузить комментарии')
+        }
     } finally {
         loadingIndicator.classList.add('hidden')
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, starting app')
-
     const nameInput = document.querySelector('.add-form-name')
     const commentInput = document.querySelector('.add-form-text')
     const commentList = document.querySelector('.comments')
@@ -33,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderComments(commentList)
     loadComments(commentList, loadingIndicator).then(() => {
-        console.log('Event listeners added')
         initAddCommentListener(
             commentList,
             commentInput,
