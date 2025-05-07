@@ -17,7 +17,7 @@
     }
 }
 
-.-loading-like {
+.animation {
     animation: rotating 2s linear infinite;
 }
 
@@ -126,7 +126,7 @@ body {
 
 .add-form {
     padding: 20px;
-    margin-top: 48px;
+    margin-top: 64px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -180,7 +180,7 @@ body {
     font-size: 16px;
     color: #666;
     text-align: center;
-    margin: 10px 0;
+    margin: 24px 0;
     max-width: 596px;
     width: 100%;
 }

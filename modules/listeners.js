@@ -87,24 +87,34 @@ export function initLikeListeners(commentList) {
             }
 
             const comment = comments[index]
-            if (!comment || comment.isLikeLoading) {
+            if (!comment) {
+                console.error('Комментарий не найден по индексу:', index)
+                return
+            }
+
+            if (comment.isLikeLoading) {
                 return
             }
 
             comment.isLikeLoading = true
-            renderComments(commentList)
+            likeButton.classList.add('animation')
 
             try {
                 await delay(2000)
+
+                // Обновляем лайк
                 comment.likes = comment.isLiked
                     ? comment.likes - 1
                     : comment.likes + 1
                 comment.isLiked = !comment.isLiked
                 comment.isLikeLoading = false
+
+                likeButton.classList.remove('animation')
                 renderComments(commentList)
             } catch (error) {
                 console.error('Ошибка при обработке лайка:', error)
                 comment.isLikeLoading = false
+                likeButton.classList.remove('animation')
                 renderComments(commentList)
                 alert('Не удалось обновить лайк')
             }
