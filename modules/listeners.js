@@ -16,15 +16,15 @@ export function initAddCommentListener(
     nameInput,
     addForm,
     loadingMessage,
+    token,
 ) {
     const addButton = document.querySelector('.add-form-button')
 
     const handlePostClick = async () => {
-        const name = nameInput.value.trim()
         const text = commentInput.value.trim()
 
-        if (name.length < 3 || text.length < 3) {
-            alert('Имя и комментарий должны быть не короче 3 символов')
+        if (text.length < 3) {
+            alert('Комментарий должен быть не короче 3 символов')
             return
         }
 
@@ -33,9 +33,8 @@ export function initAddCommentListener(
         addButton.disabled = true
 
         try {
-            await postComment(text, name)
+            await postComment(text, token)
             renderComments(commentList)
-            nameInput.value = ''
             commentInput.value = ''
         } catch (error) {
             if (error.message === 'Ошибка сервера') {
@@ -55,6 +54,8 @@ export function initAddCommentListener(
 }
 
 export function initListenerReplyToComment(commentList, commentInput) {
+    if (!commentInput) return
+
     commentList.addEventListener('click', (event) => {
         const commentElement = event.target.closest('.comment')
         if (commentElement) {
@@ -74,6 +75,7 @@ export function initListenerReplyToComment(commentList, commentInput) {
     })
 }
 
+// Слушатель для лайков
 export function initLikeListeners(commentList) {
     commentList.addEventListener('click', async (event) => {
         const likeButton = event.target.closest('.like-button')
@@ -101,14 +103,11 @@ export function initLikeListeners(commentList) {
 
             try {
                 await delay(2000)
-
-                // Обновляем лайк
                 comment.likes = comment.isLiked
                     ? comment.likes - 1
                     : comment.likes + 1
                 comment.isLiked = !comment.isLiked
                 comment.isLikeLoading = false
-
                 likeButton.classList.remove('animation')
                 renderComments(commentList)
             } catch (error) {

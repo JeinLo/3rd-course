@@ -40,6 +40,63 @@ body {
     box-sizing: border-box;
 }
 
+h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.login-form,
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 400px;
+    width: 100%;
+    background: #333;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.login-form input,
+.register-form input {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+.login-form button,
+.register-form button {
+    font-size: 18px;
+    padding: 10px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.login-form button:hover,
+.register-form button:hover {
+    opacity: 0.9;
+}
+
+.login-form p,
+.register-form p {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.login-form a,
+.register-form a {
+    color: #bcec30;
+    text-decoration: none;
+}
+
+.login-form a:hover,
+.register-form a:hover {
+    text-decoration: underline;
+}
+
 .comments,
 .comment {
     margin: 0;
@@ -143,6 +200,12 @@ body {
     box-sizing: border-box;
 }
 
+.add-form-name[readonly] {
+    background-color: #444;
+    color: #fff;
+    cursor: not-allowed;
+}
+
 .add-form-text {
     margin-top: 0;
     padding: 22px;
@@ -183,4 +246,17 @@ body {
     margin: 24px 0;
     max-width: 596px;
     width: 100%;
+}
+
+p {
+    font-size: 16px;
+}
+
+p a {
+    color: #bcec30;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
 }

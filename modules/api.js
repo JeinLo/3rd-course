@@ -1,7 +1,7 @@
 import { comments } from './comments.js'
 import { getCurrentDateTime } from './utils.js'
 
-const host = 'https://wedev-api.sky.pro/api/v1/baranova-evgeniya'
+const host = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
 
 export const fetchComments = async () => {
     try {
@@ -42,14 +42,16 @@ export const fetchComments = async () => {
     }
 }
 
-export const postComment = async (text, name) => {
+// Отправка нового комментария (требует токен)
+export const postComment = async (text, token) => {
     try {
         const res = await fetch(`${host}/comments`, {
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
                 text,
-                name,
-                forceError: true,
             }),
         })
 
@@ -57,6 +59,9 @@ export const postComment = async (text, name) => {
             if (res.status === 400) {
                 const errorData = await res.json()
                 throw new Error(errorData.error || 'Некорректные данные')
+            }
+            if (res.status === 401) {
+                throw new Error('Неавторизованный пользователь')
             }
             if (res.status >= 500 && res.status < 600) {
                 throw new Error('Ошибка сервера')
@@ -75,6 +80,55 @@ export const postComment = async (text, name) => {
                 'Кажется, у вас сломался интернет, попробуйте позже',
             )
         }
+        throw error
+    }
+}
+
+export const login = async (login, password) => {
+    try {
+        const res = await fetch(`${host}/user/login`, {
+            method: 'POST',
+            body: JSON.stringify({
+                login,
+                password,
+            }),
+        })
+
+        if (!res.ok) {
+            if (res.status === 400) {
+                const errorData = await res.json()
+                throw new Error(errorData.error || 'Неверный логин или пароль')
+            }
+            throw new Error(`Ошибка авторизации: ${res.status}`)
+        }
+
+        return await res.json()
+    } catch (error) {
+        throw error
+    }
+}
+
+export const register = async (login, password, name) => {
+    try {
+        const res = await fetch(`${host}/user`, {
+            method: 'POST',
+            body: JSON.stringify({
+                login,
+                password,
+                name,
+            }),
+        })
+
+        if (!res.ok) {
+            if (res.status === 400) {
+                const errorData = await res.json()
+                throw new Error(errorData.error || 'Ошибка при регистрации')
+            }
+            throw new Error(`Ошибка регистрации: ${res.status}`)
+        }
+
+        return await res.json()
+    } catch (error) {
         throw error
     }
 }
