@@ -5,6 +5,7 @@ export let comments = [
         text: 'Это будет первый комментарий на этой странице',
         likes: 3,
         isLiked: false,
+        isLikeLoading: false,
     },
     {
         name: 'Варвара Н.',
@@ -12,5 +13,6 @@ export let comments = [
         text: 'Мне нравится как оформлена эта страница! ❤',
         likes: 75,
         isLiked: true,
+        isLikeLoading: false,
     },
 ]
