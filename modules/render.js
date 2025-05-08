@@ -1,40 +1,135 @@
-import { comments } from './comments.js'
-import { sanitizeHTML } from './sanitize.js'
+import { fetchComments } from './api.js'
+import { sanitizeHTML } from './sanitize.js' // Импортируем из sanitize.js
 
-export function renderComments(commentList) {
-    if (!commentList) {
-        console.error('Элемент .comments не найден в DOM')
-        return
+export const renderCommentsPage = ({
+    container,
+    token,
+    userName,
+    onLogin,
+    onRegister,
+    onPostComment,
+}) => {
+    container.innerHTML = `
+        <ul class="comments"></ul>
+        <div class="loading-indicator">Загрузка комментариев...</div>
+        <div class="auth-message" style="display: ${token ? 'none' : 'block'};">
+            Чтобы добавить комментарий, 
+            <a href="#" class="login-link">авторизуйтесь</a> или 
+            <a href="#" class="register-link">зарегистрируйтесь</a>.
+        </div>
+        <form class="add-form" style="display: ${token ? 'block' : 'none'};">
+            <input type="text" class="add-form-name" readonly value="${sanitizeHTML(userName || '')}" />
+            <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+            <div class="add-form-row">
+                <button class="add-form-button">Написать</button>
+            </div>
+        </form>
+        <div class="adding-indicator" style="display: none;">Комментарий добавляется...</div>
+    `
+
+    const commentList = container.querySelector('.comments')
+    const loadingIndicator = container.querySelector('.loading-indicator')
+    const loginLink = container.querySelector('.login-link')
+    const registerLink = container.querySelector('.register-link')
+    const addForm = container.querySelector('.add-form')
+    const commentInput = container.querySelector('.add-form-text')
+
+    // Загрузка комментариев
+    fetchComments()
+        .then((comments) => {
+            if (comments.length === 0) {
+                commentList.innerHTML = '<li>Комментариев пока нет</li>'
+            } else {
+                commentList.innerHTML = comments
+                    .map(
+                        (comment, index) => `
+                    <li class="comment" data-index="${index}">
+                        <div class="comment-header">
+                            <div>${sanitizeHTML(comment.name)}</div>
+                            <div>${sanitizeHTML(comment.date)}</div>
+                        </div>
+                        <div class="comment-body">
+                            <div class="comment-text">${sanitizeHTML(comment.text)}</div>
+                        </div>
+                        <div class="comment-footer">
+                            <div class="likes">
+                                <span class="likes-counter">${comment.likes}</span>
+                                <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
+                            </div>
+                        </div>
+                    </li>
+                `,
+                    )
+                    .join('')
+            }
+        })
+        .catch((error) => {
+            alert(error.message || 'Не удалось загрузить комментарии')
+        })
+        .finally(() => {
+            if (loadingIndicator) loadingIndicator.style.display = 'none'
+        })
+
+    // Обработчики событий
+    if (loginLink) {
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault()
+            onLogin()
+        })
     }
 
-    if (comments.length === 0) {
-        commentList.innerHTML = '<li>Комментариев пока нет</li>'
-        return
+    if (registerLink) {
+        registerLink.addEventListener('click', (e) => {
+            e.preventDefault()
+            onRegister()
+        })
     }
 
-    commentList.innerHTML = comments
-        .map(
-            (comment, index) => `
-            <li class="comment" data-index="${index}">
-                <div class="comment-header">
-                    <div>${sanitizeHTML(comment.name)}</div>
-                    <div>${sanitizeHTML(comment.date)}</div>
-                </div>
-                <div class="comment-body">
-                    <div class="comment-text">${sanitizeHTML(comment.text)}</div>
-                </div>
-                <div class="comment-footer">
-                    <div class="likes">
-                        <span class="likes-counter">${comment.likes}</span>
-                        <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}">
-                            <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M11.11 16.9482L11 17.0572L10.879 16.9482C5.654 12.2507 2.2 9.14441 2.2 5.99455C2.2 3.81471 3.85 2.17984 6.05 2.17984C7.744 2.17984 9.394 3.26975 9.977 4.75204H12.023C12.606 3.26975 14.256 2.17984 15.95 2.17984C18.15 2.17984 19.8 3.81471 19.8 5.99455C19.8 9.14441 16.346 12.2507 11.11 16.9482ZM15.95 0C14.036 0 12.199 0.882834 11 2.26703C9.801 0.882834 7.964 0 6.05 0C2.662 0 0 2.6267 0 5.99455C0 10.1035 3.74 13.4714 9.405 18.5613L11 20L12.595 18.5613C18.26 13.4714 22 10.1035 22 5.99455C22 2.6267 19.338 0 15.95 0Z" fill="#BCEC30"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </li>
-        `,
-        )
-        .join('')
+    if (addForm) {
+        addForm.addEventListener('submit', (e) => {
+            e.preventDefault()
+            const text = commentInput.value.trim()
+            if (text.length < 3) {
+                alert('Комментарий должен быть не короче 3 символов')
+                return
+            }
+            onPostComment(text)
+            commentInput.value = ''
+        })
+    }
+
+    // Лайки и ответы на комментарии
+    commentList.addEventListener('click', (e) => {
+        const likeButton = e.target.closest('.like-button')
+        if (likeButton) {
+            const index = parseInt(likeButton.dataset.index, 10)
+            fetchComments().then((comments) => {
+                if (!token) {
+                    alert('Требуется авторизация для лайков')
+                    return
+                }
+                comments[index].isLiked = !comments[index].isLiked
+                comments[index].likes += comments[index].isLiked ? 1 : -1
+                renderCommentsPage({
+                    container,
+                    token,
+                    userName,
+                    onLogin,
+                    onRegister,
+                    onPostComment,
+                })
+            })
+            return
+        }
+
+        const commentEl = e.target.closest('.comment')
+        if (commentEl && commentInput) {
+            const index = parseInt(commentEl.dataset.index, 10)
+            fetchComments().then((comments) => {
+                const comment = comments[index]
+                commentInput.value = `> ${comment.text}\n${commentInput.value}`
+                commentInput.focus()
+            })
+        }
+    })
 }

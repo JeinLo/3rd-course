@@ -1,50 +1,67 @@
-import { fetchComments } from './api.js'
-import { renderComments } from './render.js'
-import {
-    initAddCommentListener,
-    initLikeListeners,
-    initListenerReplyToComment,
-} from './listeners.js'
-
-const loadComments = async (commentList, loadingIndicator) => {
-    loadingIndicator.classList.remove('hidden')
-    try {
-        await fetchComments()
-        renderComments(commentList)
-    } catch (error) {
-        if (error.message === 'Ошибка сервера') {
-            alert('Сервер сломался, попробуй позже')
-        } else if (
-            error.message ===
-            'Кажется, у вас сломался интернет, попробуйте позже'
-        ) {
-            alert(error.message)
-        } else {
-            alert('Не удалось загрузить комментарии')
-        }
-    } finally {
-        loadingIndicator.classList.add('hidden')
-    }
-}
+import { fetchComments, postComment } from './api.js'
+import { renderCommentsPage } from './render.js'
+import { login, register } from './auth.js'
 
 document.addEventListener('DOMContentLoaded', () => {
-    const nameInput = document.querySelector('.add-form-name')
-    const commentInput = document.querySelector('.add-form-text')
-    const commentList = document.querySelector('.comments')
-    const addForm = document.querySelector('.add-form')
-    const loadingIndicator = document.querySelector('#loading-indicator')
-    const loadingMessage = document.querySelector('#loading-message')
+    const container = document.querySelector('.container')
+    if (!container) {
+        console.error('Container not found')
+        return
+    }
 
-    renderComments(commentList)
-    loadComments(commentList, loadingIndicator).then(() => {
-        initAddCommentListener(
-            commentList,
-            commentInput,
-            nameInput,
-            addForm,
-            loadingMessage,
-        )
-        initLikeListeners(commentList)
-        initListenerReplyToComment(commentList, commentInput)
+    const token = localStorage.getItem('authToken')
+    const userName = localStorage.getItem('userName')
+
+    renderCommentsPage({
+        container,
+        token,
+        userName,
+        onLogin: () => {
+            container.innerHTML = ''
+            login({
+                container,
+                onSuccess: () =>
+                    renderCommentsPage({
+                        container,
+                        token: localStorage.getItem('authToken'),
+                        userName: localStorage.getItem('userName'),
+                    }),
+            })
+        },
+        onRegister: () => {
+            container.innerHTML = ''
+            register({
+                container,
+                onSuccess: () =>
+                    renderCommentsPage({
+                        container,
+                        token: localStorage.getItem('authToken'),
+                        userName: localStorage.getItem('userName'),
+                    }),
+            })
+        },
+        onPostComment: (text) => {
+            const loadingIndicator =
+                container.querySelector('.adding-indicator')
+            const addForm = container.querySelector('.add-form')
+            if (loadingIndicator) loadingIndicator.style.display = 'block'
+            if (addForm) addForm.style.opacity = '0'
+
+            postComment(text)
+                .then(() => {
+                    return fetchComments()
+                })
+                .then(() => {
+                    renderCommentsPage({ container, token, userName })
+                })
+                .catch((error) => {
+                    alert(error.message || 'Не удалось отправить комментарий')
+                })
+                .finally(() => {
+                    if (loadingIndicator)
+                        loadingIndicator.style.display = 'none'
+                    if (addForm) addForm.style.opacity = '1'
+                })
+        },
     })
 })
