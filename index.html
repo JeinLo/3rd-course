@@ -2,34 +2,11 @@
 <html lang="ru">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Лента комментариев</title>
+        <title>Комментарии</title>
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <div id="app">
-            <div class="container">
-                <ul class="comments"></ul>
-                <div id="loading-indicator" class="hidden">Загрузка...</div>
-                <div id="loading-message" class="hidden">
-                    Комментарий добавляется...
-                </div>
-                <div class="add-form">
-                    <input
-                        type="text"
-                        class="add-form-name"
-                        placeholder="Введите ваше имя"
-                    />
-                    <textarea
-                        class="add-form-text"
-                        placeholder="Введите ваш комментарий"
-                    ></textarea>
-                    <div class="add-form-row">
-                        <button class="add-form-button">Написать</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script type="module" src="main.js"></script>
+        <div class="container"></div>
+        <script type="module" src="/modules/main.js"></script>
     </body>
 </html>

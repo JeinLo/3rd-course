@@ -19,9 +19,19 @@ export function initAddCommentListener(
     token,
 ) {
     const addButton = document.querySelector('.add-form-button')
+    if (!addButton || !commentInput || !addForm || !loadingMessage) {
+        console.error('Не найдены элементы формы:', {
+            addButton,
+            commentInput,
+            addForm,
+            loadingMessage,
+        })
+        return
+    }
 
     const handlePostClick = async () => {
         const text = commentInput.value.trim()
+        console.log('Попытка добавить комментарий:', text)
 
         if (text.length < 3) {
             alert('Комментарий должен быть не короче 3 символов')
@@ -37,6 +47,7 @@ export function initAddCommentListener(
             renderComments(commentList)
             commentInput.value = ''
         } catch (error) {
+            console.error('Ошибка при добавлении комментария:', error.message)
             if (error.message === 'Ошибка сервера') {
                 alert('Сервер сломался, попробуй позже')
                 handlePostClick()
@@ -51,10 +62,16 @@ export function initAddCommentListener(
     }
 
     addButton.addEventListener('click', handlePostClick)
+    console.log('Слушатель для добавления комментария инициализирован')
 }
 
 export function initListenerReplyToComment(commentList, commentInput) {
-    if (!commentInput) return
+    if (!commentInput) {
+        console.log(
+            'Поле ввода комментария отсутствует (пользователь не авторизован)',
+        )
+        return
+    }
 
     commentList.addEventListener('click', (event) => {
         const commentElement = event.target.closest('.comment')
@@ -75,7 +92,6 @@ export function initListenerReplyToComment(commentList, commentInput) {
     })
 }
 
-// Слушатель для лайков
 export function initLikeListeners(commentList) {
     commentList.addEventListener('click', async (event) => {
         const likeButton = event.target.closest('.like-button')

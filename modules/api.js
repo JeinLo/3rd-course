@@ -1,134 +1,72 @@
-import { comments } from './comments.js'
-import { getCurrentDateTime } from './utils.js'
-
 const host = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
 
-export const fetchComments = async () => {
-    try {
-        const res = await fetch(`${host}/comments`, {
-            method: 'GET',
-        })
-
-        if (!res.ok) {
-            if (res.status >= 500 && res.status < 600) {
-                throw new Error('Ошибка сервера')
+export const fetchComments = () => {
+    return fetch(`${host}/comments`, {
+        method: 'GET',
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Не удалось загрузить комментарии')
             }
-            throw new Error(`Ошибка при загрузке комментариев: ${res.status}`)
-        }
-
-        const responseData = await res.json()
-        const formattedComments = responseData.comments.map((comment) => ({
-            name: comment.author?.name || 'Anonymous',
-            date: comment.date || getCurrentDateTime(),
-            text: comment.text || '',
-            likes: comment.likes || 0,
-            isLiked: comment.isLiked || false,
-            isLikeLoading: false,
-        }))
-
-        comments.length = 0
-        comments.push(...formattedComments)
-        return comments
-    } catch (error) {
-        if (
-            error.name === 'TypeError' &&
-            error.message.includes('Failed to fetch')
-        ) {
-            throw new Error(
-                'Кажется, у вас сломался интернет, попробуйте позже',
-            )
-        }
-        throw error
-    }
+            return res.json()
+        })
+        .then((data) => {
+            return data.comments.map((comment) => ({
+                id: comment.id,
+                name: comment.author?.name || 'Anonymous',
+                date: comment.date || new Date().toISOString(),
+                text: comment.text || '',
+                likes: comment.likes || 0,
+                isLiked: comment.isLiked || false,
+            }))
+        })
 }
 
-// Отправка нового комментария (требует токен)
-export const postComment = async (text, token) => {
-    try {
-        const res = await fetch(`${host}/comments`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                text,
-            }),
-        })
+export const postComment = (text) => {
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+        throw new Error('Требуется авторизация')
+    }
 
+    return fetch(`${host}/comments`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+    }).then((res) => {
         if (!res.ok) {
-            if (res.status === 400) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || 'Некорректные данные')
-            }
             if (res.status === 401) {
-                throw new Error('Неавторизованный пользователь')
+                localStorage.removeItem('authToken')
+                localStorage.removeItem('userName')
+                throw new Error('Требуется авторизация')
             }
-            if (res.status >= 500 && res.status < 600) {
-                throw new Error('Ошибка сервера')
-            }
-            throw new Error(`Ошибка сервера: ${res.status}`)
+            throw new Error('Не удалось отправить комментарий')
         }
-
-        await res.json()
-        return await fetchComments()
-    } catch (error) {
-        if (
-            error.name === 'TypeError' &&
-            error.message.includes('Failed to fetch')
-        ) {
-            throw new Error(
-                'Кажется, у вас сломался интернет, попробуйте позже',
-            )
-        }
-        throw error
-    }
+        return res.json()
+    })
 }
 
-export const login = async (login, password) => {
-    try {
-        const res = await fetch(`${host}/user/login`, {
-            method: 'POST',
-            body: JSON.stringify({
-                login,
-                password,
-            }),
-        })
-
+export const loginUser = (login, password) => {
+    return fetch(`${host}/user/login`, {
+        method: 'POST',
+        body: JSON.stringify({ login, password }),
+    }).then((res) => {
         if (!res.ok) {
-            if (res.status === 400) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || 'Неверный логин или пароль')
-            }
-            throw new Error(`Ошибка авторизации: ${res.status}`)
+            throw new Error('Неверный логин или пароль')
         }
-
-        return await res.json()
-    } catch (error) {
-        throw error
-    }
+        return res.json()
+    })
 }
 
-export const register = async (login, password, name) => {
-    try {
-        const res = await fetch(`${host}/user`, {
-            method: 'POST',
-            body: JSON.stringify({
-                login,
-                password,
-                name,
-            }),
-        })
-
+export const registerUser = (login, name, password) => {
+    return fetch(`${host}/user`, {
+        method: 'POST',
+        body: JSON.stringify({ login, name, password }),
+    }).then((res) => {
         if (!res.ok) {
-            if (res.status === 400) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || 'Ошибка при регистрации')
-            }
-            throw new Error(`Ошибка регистрации: ${res.status}`)
+            throw new Error('Ошибка регистрации')
         }
-
-        return await res.json()
-    } catch (error) {
-        throw error
-    }
+        return res.json()
+    })
 }

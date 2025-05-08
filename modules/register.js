@@ -1,65 +1,91 @@
-import { register } from './api.js'
-import { saveUserToStorage } from './auth.js'
-import { renderLogin } from './login.js'
+import { loadAndRenderComments } from './main.js'
 
-export function renderRegister({ onRegisterSuccess }) {
-    const app = document.querySelector('#app')
-    if (!app) {
-        console.error('Элемент #app не найден в DOM')
-        return
-    }
+const host = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
 
-    app.innerHTML = `
-        <div class="container">
-            <h1>Страница регистрации</h1>
-            <div class="register-form">
-                <input type="text" id="login-input" placeholder="Логин" />
-                <input type="text" id="name-input" placeholder="Имя" />
-                <input type="password" id="password-input" placeholder="Пароль" />
-                <button id="register-button">Зарегистрироваться</button>
-                <p>Уже есть аккаунт? <a href="#" id="to-login">Войти</a></p>
-                <div id="error-message" style="color: red;"></div>
-            </div>
-        </div>
+export const renderRegister = ({ container, onRegisterSuccess }) => {
+    console.log('Rendering register form')
+
+    const registerFormHtml = `
+        <h1>Регистрация</h1>
+        <form class="register-form">
+            <input type="text" class="register-form-login" placeholder="Логин" required autocomplete="username" />
+            <input type="text" class="register-form-name" placeholder="Имя" required autocomplete="name" />
+            <input type="password" class="register-form-password" placeholder="Пароль" required autocomplete="new-password" />
+            <button type="submit" class="register-form-button">Зарегистрироваться</button>
+        </form>
+        <div class="error-message" style="display: none; color: #ff3333; text-align: center; margin-top: 10px;"></div>
     `
 
-    const loginInput = document.querySelector('#login-input')
-    const nameInput = document.querySelector('#name-input')
-    const passwordInput = document.querySelector('#password-input')
-    const registerButton = document.querySelector('#register-button')
-    const errorMessage = document.querySelector('#error-message')
-    const toLoginLink = document.querySelector('#to-login')
+    container.innerHTML = registerFormHtml
 
-    registerButton.addEventListener('click', async () => {
-        const loginValue = loginInput.value.trim()
-        const nameValue = nameInput.value.trim()
-        const passwordValue = passwordInput.value.trim()
+    const registerForm = container.querySelector('.register-form')
+    const loginInput = container.querySelector('.register-form-login')
+    const nameInput = container.querySelector('.register-form-name')
+    const passwordInput = container.querySelector('.register-form-password')
+    const errorMessage = container.querySelector('.error-message')
 
-        if (!loginValue || !nameValue || !passwordValue) {
+    registerForm.addEventListener('submit', (event) => {
+        event.preventDefault()
+        const login = loginInput.value.trim()
+        const name = nameInput.value.trim()
+        const password = passwordInput.value.trim()
+
+        console.log('Sending registration:', { login, name, password })
+
+        if (!login || !name || !password) {
             errorMessage.textContent = 'Заполните все поля'
+            errorMessage.style.display = 'block'
             return
         }
 
-        try {
-            const response = await register(
-                loginValue,
-                passwordValue,
-                nameValue,
-            )
-            const user = {
-                login: response.user.login,
-                name: response.user.name,
-                token: response.user.token,
-            }
-            saveUserToStorage(user)
-            onRegisterSuccess()
-        } catch (error) {
-            errorMessage.textContent = error.message || 'Ошибка регистрации'
-        }
-    })
+        const body = JSON.stringify({ login, name, password })
 
-    toLoginLink.addEventListener('click', (e) => {
-        e.preventDefault()
-        renderLogin({ onLoginSuccess: onRegisterSuccess })
+        console.log('Sending JSON body:', body)
+
+        fetch(`${host}/user`, {
+            method: 'POST',
+            body,
+        })
+            .then(async (res) => {
+                console.log('Register response:', res.status, res.statusText)
+                let responseText = ''
+                try {
+                    responseText = await res.text()
+                    console.log('Raw response:', responseText)
+                } catch (e) {
+                    console.error('Failed to read response text:', e)
+                }
+                if (!res.ok) {
+                    let errorData = {}
+                    try {
+                        errorData = JSON.parse(responseText)
+                    } catch (e) {
+                        console.error('Failed to parse error response:', e)
+                    }
+                    if (res.status === 400) {
+                        throw new Error(
+                            errorData.error ||
+                                'Ошибка регистрации: неверные данные',
+                        )
+                    }
+                    throw new Error(`Ошибка сервера: ${res.status}`)
+                }
+                return JSON.parse(responseText)
+            })
+            .then((responseData) => {
+                console.log('Registration successful:', responseData)
+                const { token, name } = responseData.user
+                localStorage.setItem('authToken', token)
+                localStorage.setItem('userName', name)
+                console.log('Saved userName:', name)
+                onRegisterSuccess()
+                loadAndRenderComments()
+            })
+            .catch((error) => {
+                console.error('Ошибка регистрации:', error)
+                errorMessage.textContent =
+                    error.message || 'Не удалось зарегистрироваться'
+                errorMessage.style.display = 'block'
+            })
     })
 }
