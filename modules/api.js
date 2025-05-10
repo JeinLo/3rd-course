@@ -60,14 +60,13 @@ export const loginUser = (login, password) => {
         { login, password },
     )
 
-    // Преобразуем данные в формат application/x-www-form-urlencoded
     const formData = new URLSearchParams()
     formData.append('login', login)
     formData.append('password', password)
 
     return fetch(`${authHost}/login`, {
         method: 'POST',
-        body: formData, // Отправляем данные в формате application/x-www-form-urlencoded
+        body: formData,
     })
         .then(async (res) => {
             console.log('Login response:', res.status, res.statusText)
@@ -106,7 +105,6 @@ export const registerUser = (login, name, password) => {
         { login, name, password },
     )
 
-    // Преобразуем данные в формат application/x-www-form-urlencoded
     const formData = new URLSearchParams()
     formData.append('login', login)
     formData.append('name', name)
@@ -114,8 +112,7 @@ export const registerUser = (login, name, password) => {
 
     return fetch(`${authHost}/register-user`, {
         method: 'POST',
-        body: formData, // Отправляем данные в формате application/x-www-form-urlencoded
-    })
+        body: formData,
         .then(async (res) => {
             console.log('Register response:', res.status, res.statusText)
             const responseText = await res.text()
