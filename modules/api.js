@@ -1,8 +1,9 @@
-const host = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
+const commentsHost = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
+const authHost = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
 
 export const fetchComments = () => {
-    console.log('Fetching comments from:', `${host}/comments`)
-    return fetch(`${host}/comments`, {
+    console.log('Fetching comments from:', `${commentsHost}/comments`)
+    return fetch(`${commentsHost}/comments`, {
         method: 'GET',
     })
         .then((res) => {
@@ -25,13 +26,13 @@ export const fetchComments = () => {
 }
 
 export const postComment = (text) => {
-    console.log('Posting comment to:', `${host}/comments`)
+    console.log('Posting comment to:', `${commentsHost}/comments`)
     const token = localStorage.getItem('authToken')
     if (!token) {
         throw new Error('Требуется авторизация')
     }
 
-    return fetch(`${host}/comments`, {
+    return fetch(`${commentsHost}/comments`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -54,14 +55,19 @@ export const postComment = (text) => {
 export const loginUser = (login, password) => {
     console.log(
         'Sending login request to:',
-        `${host}/user/login`,
+        `${authHost}/login`,
         'with data:',
         { login, password },
     )
 
-    return fetch(`${host}/user/login`, {
+    // Преобразуем данные в формат application/x-www-form-urlencoded
+    const formData = new URLSearchParams()
+    formData.append('login', login)
+    formData.append('password', password)
+
+    return fetch(`${authHost}/login`, {
         method: 'POST',
-        body: JSON.stringify({ login, password }),
+        body: formData, // Отправляем данные в формате application/x-www-form-urlencoded
     })
         .then(async (res) => {
             console.log('Login response:', res.status, res.statusText)
@@ -93,16 +99,22 @@ export const loginUser = (login, password) => {
 }
 
 export const registerUser = (login, name, password) => {
-    console.log('Sending register request to:', `${host}/users`, 'with data:', {
-        login,
-        name,
-        password,
-    })
+    console.log(
+        'Sending register request to:',
+        `${authHost}/register-user`,
+        'with data:',
+        { login, name, password },
+    )
 
-    return fetch(`${host}/users`, {
-        // Изменяем эндпоинт на /users
+    // Преобразуем данные в формат application/x-www-form-urlencoded
+    const formData = new URLSearchParams()
+    formData.append('login', login)
+    formData.append('name', name)
+    formData.append('password', password)
+
+    return fetch(`${authHost}/register-user`, {
         method: 'POST',
-        body: JSON.stringify({ login, name, password }),
+        body: formData, // Отправляем данные в формате application/x-www-form-urlencoded
     })
         .then(async (res) => {
             console.log('Register response:', res.status, res.statusText)
