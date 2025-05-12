@@ -4,10 +4,28 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Комментарии</title>
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="/styles.css" />
     </head>
     <body>
-        <div class="container"></div>
+        <div id="app">
+            <h1>Комментарии</h1>
+            <button id="logout-button" style="display: none">Выйти</button>
+            <ul id="comments-list"></ul>
+            <div id="comment-form" style="display: none">
+                <h3>Добавить комментарий</h3>
+                <p>Вы вошли как: <span id="user-name" readonly></span></p>
+                <textarea
+                    id="comment-text"
+                    placeholder="Введите ваш комментарий"
+                ></textarea>
+                <button id="comment-button">Отправить</button>
+            </div>
+            <p id="login-required">
+                Чтобы добавить комментарий, <a href="#">авторизуйтесь</a>
+            </p>
+            <div id="auth-form-container" style="display: none"></div>
+        </div>
+
         <script type="module" src="/modules/main.js"></script>
     </body>
 </html>

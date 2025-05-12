@@ -1,232 +1,9 @@
-body {
-    margin: 0;
-}
-
-.container {
-    font-family: Helvetica, Arial, sans-serif;
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 80px;
-    padding-bottom: 200px;
-    background: #202020;
-    min-height: 100vh;
-}
-
-h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-    color: #ffffff;
-    text-align: center;
-}
-
-.comments,
-.comment {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.comment,
-.add-form,
-.auth-form {
-    width: 596px;
-    box-sizing: border-box;
-    background: radial-gradient(
-        75.42% 75.42% at 50% 42.37%,
-        rgba(53, 53, 53, 0.8) 22.92%,
-        #7334ea 100%
-    );
-    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
-    border-radius: 20px;
-}
-
-.comments {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.comment {
-    padding: 48px;
-}
-
-.comment-header {
-    font-size: 16px;
-    display: flex;
-    justify-content: space-between;
-    color: #ffffff;
-}
-
-.comment-footer {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.comment-body {
-    margin-top: 32px;
-    margin-bottom: 32px;
-}
-
-.comment-text {
-    font-size: 32px;
-    color: #ffffff;
-}
-
-.likes {
-    display: flex;
-    align-items: center;
-}
-
-.likes-counter {
-    font-size: 26px;
-    margin-right: 8px;
-    color: #ffffff;
-}
-
-.like-button {
-    all: unset;
-    cursor: pointer;
-    margin-left: 10px;
-    background-image: url("data:image/svg+xml,%3Csvg width='22' height='20' viewBox='0 0 22 20' fill='none' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath d='M11.11 16.9482L11 17.0572L10.879 16.9482C5.654 12.2507 2.2 9.14441 2.2 5.99455C2.2 3.81471 3.85 2.17984 6.05 2.17984C7.744 2.17984 9.394 3.26975 9.977 4.75204H12.023C12.606 3.26975 14.256 2.17984 15.95 2.17984C18.15 2.17984 19.8 3.81471 19.8 5.99455C19.8 9.14441 16.346 12.2507 11.11 16.9482ZM15.95 0C14.036 0 12.199 0.882834 11 2.26703C9.801 0.882834 7.964 0 6.05 0C2.662 0 0 2.6267 0 5.99455C0 10.1035 3.74 13.4714 9.405 18.5613L11 20L12.595 18.5613C18.26 13.4714 22 10.1035 22 5.99455C22 2.6267 19.338 0 15.95 0Z' fill='%23BCEC30' /%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    width: 22px;
-    height: 22px;
-}
-
-.-active-like {
-    background-image: url("data:image/svg+xml,%3Csvg width='22' height='20' viewBox='0 0 22 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.95 0C14.036 0 12.199 0.882834 11 2.26703C9.801 0.882834 7.964 0 6.05 0C2.662 0 0 2.6267 0 5.99455C0 10.1035 3.74 13.4714 9.405 18.5613L11 20L12.595 18.5613C18.26 13.4714 22 10.1035 22 5.99455C22 2.6267 19.338 0 15.95 0Z' fill='%23BCEC30'/%3E%3C/svg%3E");
-}
-
-.add-form {
-    padding: 20px;
-    margin: 48px auto 0;
-    display: flex;
-    flex-direction: column;
-    width: 596px;
-    max-width: 596px;
-    box-sizing: border-box;
-    transition: opacity 0.3s ease;
-}
-
-.add-form-name,
-.add-form-text {
-    font-size: 16px;
-    font-family: Helvetica, Arial, sans-serif;
-    border-radius: 8px;
-    border: none;
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    color: #333333;
-}
-
-.add-form-name {
-    padding: 11px 22px;
-    max-width: 300px;
-}
-
-.add-form-text {
-    margin-top: 12px;
-    padding: 22px;
-    resize: none;
-    min-height: 80px;
-}
-
-.add-form-row {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.add-form-button {
-    margin-top: 24px;
-    font-size: 24px;
-    padding: 10px 20px;
-    background-color: #bcec30;
-    color: #333333;
-    border: none;
-    border-radius: 18px;
-    cursor: pointer;
-}
-
-.add-form-button:hover {
-    opacity: 0.9;
-}
-
-.loading-indicator,
-.adding-indicator {
+/* Скрытие элементов */
+.hidden {
     display: none;
-    text-align: center;
-    padding: 20px;
-    font-size: 16px;
-    color: #ffffff;
-    width: 596px;
-    margin: 20px auto;
-    background: #333333;
-    border-radius: 8px;
-    transition: opacity 0.3s ease;
 }
 
-.auth-message {
-    font-size: 16px;
-    color: #ffffff;
-    text-align: center;
-    margin: 20px auto;
-    width: 596px;
-}
-
-.auth-message a {
-    color: #bcec30;
-    text-decoration: none;
-}
-
-.auth-message a:hover {
-    text-decoration: underline;
-}
-
-.auth-form {
-    padding: 20px;
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.auth-form input {
-    font-size: 16px;
-    font-family: Helvetica, Arial, sans-serif;
-    border-radius: 8px;
-    border: none;
-    padding: 11px 22px;
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    color: #333333;
-}
-
-.auth-form button {
-    font-size: 24px;
-    padding: 10px 20px;
-    background-color: #bcec30;
-    color: #333333;
-    border: none;
-    border-radius: 18px;
-    cursor: pointer;
-    margin-top: 12px;
-}
-
-.auth-form button:hover {
-    opacity: 0.9;
-}
-
-.error-message {
-    font-size: 16px;
-    color: #ff3333;
-    text-align: center;
-    margin-top: 10px;
-}
-
+/* Анимация для лайков */
 @keyframes rotating {
     from {
         transform: rotate(0deg);
@@ -242,6 +19,282 @@ h1 {
     }
 }
 
-.-loading-like {
+.animation {
     animation: rotating 2s linear infinite;
+}
+
+/* Базовые стили для страницы */
+body {
+    margin: 0;
+    background: #202020;
+    color: #ffffff;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+/* Контейнер приложения */
+#app {
+    font-family: Helvetica;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px;
+    padding-bottom: 200px;
+    background: #202020;
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Заголовок */
+h1 {
+    font-size: 32px;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+/* Список комментариев */
+#comments-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 596px;
+    width: 100%;
+}
+
+/* Стили для каждого комментария */
+.comment {
+    width: 100%;
+    max-width: 596px;
+    box-sizing: border-box;
+    background: radial-gradient(
+        75.42% 75.42% at 50% 42.37%,
+        rgba(53, 53, 53, 0) 22.92%,
+        #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    padding: 48px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+/* Заголовок комментария (имя и дата) */
+.comment-header {
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Тело комментария */
+.comment-body {
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+/* Текст комментария */
+.comment-body p {
+    font-size: 32px;
+    margin: 0;
+    color: #ffffff;
+}
+
+/* Подвал комментария (лайки) */
+.comment-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Лайки */
+.likes {
+    display: flex;
+    align-items: center;
+}
+
+.likes-counter {
+    font-size: 26px;
+    margin-right: 8px;
+    color: #ffffff;
+}
+
+.like-button {
+    all: unset;
+    cursor: pointer;
+    margin-left: 10px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+}
+
+.like-button svg {
+    fill: #bcec30;
+}
+
+.-active-like svg {
+    fill: #ff6347;
+}
+
+/* Форма добавления комментария */
+#comment-form {
+    width: 100%;
+    max-width: 596px;
+    box-sizing: border-box;
+    background: radial-gradient(
+        75.42% 75.42% at 50% 42.37%,
+        rgba(53, 53, 53, 0) 22.92%,
+        #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#comment-form h3 {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    color: #ffffff;
+}
+
+#comment-form p {
+    font-size: 16px;
+    margin: 0 0 16px 0;
+    color: #ffffff;
+}
+
+#user-name {
+    font-weight: bold;
+    color: #bcec30;
+}
+
+#comment-text {
+    font-size: 16px;
+    font-family: Helvetica;
+    border-radius: 8px;
+    border: none;
+    padding: 22px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    min-height: 100px;
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Форма авторизации/регистрации */
+#auth-form-container {
+    width: 100%;
+    max-width: 596px;
+    box-sizing: border-box;
+    background: radial-gradient(
+        75.42% 75.42% at 50% 42.37%,
+        rgba(53, 53, 53, 0) 22.92%,
+        #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-form h2 {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    color: #ffffff;
+}
+
+.auth-form input {
+    font-size: 16px;
+    font-family: Helvetica;
+    border-radius: 8px;
+    border: none;
+    padding: 11px 22px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #000000;
+}
+
+.auth-form input:not(:last-child) {
+    margin-bottom: 16px; /* Отступ между полями ввода */
+}
+
+.auth-form input::placeholder {
+    color: #aaa;
+}
+
+/* Кнопки */
+.add-form-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.add-form-button,
+button {
+    margin-top: 16px;
+    font-size: 24px;
+    padding: 10px 20px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    width: auto;
+    color: #202020;
+}
+
+button:hover,
+.add-form-button:hover {
+    opacity: 0.9;
+}
+
+button:disabled,
+.add-form-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Кнопка "Выйти" */
+#logout-button {
+    margin: 20px 0;
+    font-size: 18px;
+    padding: 8px 16px;
+    background-color: #ff6347;
+    color: #ffffff;
+}
+
+#logout-button:hover {
+    opacity: 0.9;
+}
+
+/* Индикатор загрузки */
+#loading-indicator,
+#loading-message {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    margin: 24px 0;
+    max-width: 596px;
+    width: 100%;
+}
+
+/* Сообщение, если комментариев нет */
+#comments-list:empty::before {
+    content: 'Пока нет комментариев...';
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    display: block;
+    margin: 24px 0;
 }

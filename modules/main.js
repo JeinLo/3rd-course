@@ -1,89 +1,141 @@
-console.log('main.js is loaded')
+import {
+    fetchComments,
+    postComment,
+    loginUser,
+    registerUser,
+    likeComment,
+} from './api.js'
+import { renderComments, renderLoginForm } from './render.js'
+import { sanitizeHTML } from './sanitize.js'
 
-import { fetchComments, postComment } from './api.js'
-import { renderCommentsPage } from './render.js'
-import { login, register } from './auth.js'
+let comments = []
+let user = null
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM is fully loaded')
-    const container = document.querySelector('.container')
-    if (!container) {
-        console.error('Container not found in DOM')
-        return
-    }
-
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('authToken')
     const userName = localStorage.getItem('userName')
+    if (token && userName) {
+        user = { name: userName, token }
+    }
 
-    console.log(
-        'Rendering comments page with token:',
-        !!token,
-        'userName:',
-        userName,
-    )
+    initApp()
 
-    renderCommentsPage({
-        container,
-        token,
-        userName,
-        onLogin: () => {
-            console.log('Login link clicked')
-            container.innerHTML = ''
-            login({
-                container,
-                onSuccess: () => {
-                    console.log('Login successful, re-rendering page') // Лог для отладки
-                    renderCommentsPage({
-                        container,
-                        token: localStorage.getItem('authToken'),
-                        userName: localStorage.getItem('userName'),
-                    })
-                },
-            })
-        },
-        onRegister: () => {
-            console.log('Register link clicked')
-            container.innerHTML = ''
-            register({
-                container,
-                onSuccess: () => {
-                    console.log('Register successful, re-rendering page') // Лог для отладки
-                    renderCommentsPage({
-                        container,
-                        token: localStorage.getItem('authToken'),
-                        userName: localStorage.getItem('userName'),
-                    })
-                },
-            })
-        },
-        onPostComment: (text) => {
-            console.log('Posting comment:', text)
-            const loadingIndicator =
-                container.querySelector('.adding-indicator')
-            const addForm = container.querySelector('.add-form')
-            if (loadingIndicator) loadingIndicator.style.display = 'block'
-            if (addForm) addForm.style.opacity = '0'
+    if (!user) {
+        renderLoginForm()
+    }
 
-            postComment(text)
-                .then(() => {
-                    console.log(
-                        'Comment posted successfully, fetching updated comments',
-                    )
-                    return fetchComments()
-                })
-                .then(() => {
-                    console.log('Re-rendering comments page after posting')
-                    renderCommentsPage({ container, token, userName })
-                })
-                .catch((error) => {
-                    console.error('Error posting comment:', error)
-                    alert(error.message || 'Не удалось отправить комментарий')
-                })
-                .finally(() => {
-                    if (loadingIndicator)
-                        loadingIndicator.style.display = 'none'
-                    if (addForm) addForm.style.opacity = '1'
-                })
-        },
-    })
+    document
+        .getElementById('comment-button')
+        ?.addEventListener('click', handleCommentSubmit)
+    document
+        .getElementById('login-button')
+        ?.addEventListener('click', handleLogin)
+    document
+        .getElementById('register-button')
+        ?.addEventListener('click', handleRegister)
+    document
+        .getElementById('logout-button')
+        ?.addEventListener('click', handleLogout)
+    document
+        .getElementById('login-required')
+        ?.addEventListener('click', (e) => {
+            e.preventDefault()
+            document.getElementById('auth-form-container').style.display =
+                'block'
+        })
+
+    addLikeEventListeners()
 })
+
+function initApp() {
+    fetchComments()
+        .then((fetchedComments) => {
+            comments = fetchedComments
+            renderComments(comments, user)
+        })
+        .catch((err) => alert('Не удалось загрузить комментарии'))
+}
+
+function handleCommentSubmit() {
+    const text = document.getElementById('comment-text').value.trim()
+    if (!text) {
+        alert('Комментарий не может быть пустым')
+        return
+    }
+    postComment(text)
+        .then(() => {
+            document.getElementById('comment-text').value = ''
+            return fetchComments()
+        })
+        .then((newComments) => {
+            comments = newComments
+            renderComments(comments, user)
+        })
+        .catch((err) => alert(err.message))
+}
+
+function handleLogin() {
+    const login = document.getElementById('login-input').value.trim()
+    const password = document.getElementById('password-input').value.trim()
+    if (!login || !password) {
+        alert('Заполните все поля')
+        return
+    }
+    loginUser(login, password)
+        .then((data) => {
+            user = { name: data.user.name, token: data.user.token }
+            localStorage.setItem('authToken', user.token)
+            localStorage.setItem('userName', user.name)
+            renderComments(comments, user)
+        })
+        .catch((err) => alert(err.message))
+}
+
+function handleRegister() {
+    const login = document.getElementById('login-input').value.trim()
+    const name = document.getElementById('name-input').value.trim()
+    const password = document.getElementById('password-input').value.trim()
+    if (!login || !name || !password) {
+        alert('Заполните все поля')
+        return
+    }
+    registerUser(login, name, password)
+        .then((data) => {
+            user = { name: data.user.name, token: data.user.token }
+            localStorage.setItem('authToken', user.token)
+            localStorage.setItem('userName', user.name)
+            renderComments(comments, user)
+        })
+        .catch((err) => alert(err.message))
+}
+
+function handleLogout() {
+    user = null
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('userName')
+    renderComments(comments, user)
+    renderLoginForm()
+}
+
+function addLikeEventListeners() {
+    document.querySelectorAll('.like-button').forEach((button) => {
+        button.addEventListener('click', async (event) => {
+            const index = parseInt(event.target.dataset.index, 10)
+            const token = localStorage.getItem('authToken')
+
+            if (!token) {
+                alert('Требуется авторизация для лайков')
+                return
+            }
+
+            try {
+                const updatedData = await likeComment(comments[index].id, token)
+                comments[index].likes = updatedData.likes
+                comments[index].isLiked = !comments[index].isLiked
+                renderComments(comments, user)
+            } catch (error) {
+                alert(error.message)
+            }
+        })
+    })
+}
