@@ -55,7 +55,7 @@ export const renderLoginForm = () => {
         <form class="auth-form">
             <h2>Авторизация / Регистрация</h2>
             <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
-            <input type="text" id="name-input" placeholder="Имя (для регистрации)" required />
+            <input type="text" id="name-input" placeholder="Имя (для регистрации)" autocomplete="name" required />
             <input type="password" id="password-input" placeholder="Пароль" autocomplete="current-password" required />
             <button type="submit" id="login-button">Войти</button>
             <button type="submit" id="register-button">Зарегистрироваться</button>

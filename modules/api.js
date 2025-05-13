@@ -61,7 +61,9 @@ export const registerUser = (login, name, password) => {
 export const likeComment = (id, token) => {
     return fetch(`${commentsHost}/comments/${id}/like`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     }).then((res) => {
         if (!res.ok) throw new Error('Не удалось поставить лайк')
         return res.json()

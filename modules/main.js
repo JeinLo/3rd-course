@@ -24,15 +24,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderLoginForm()
     }
 
+    // --- Обработчики событий ---
+    const authForm = document.querySelector('.auth-form')
+    if (authForm) {
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault()
+            const login = document.getElementById('login-input')?.value.trim()
+            const name = document.getElementById('name-input')?.value.trim()
+            const password = document
+                .getElementById('password-input')
+                ?.value.trim()
+
+            const isLoginButton = e.submitter?.id === 'login-button'
+            const isRegisterButton = e.submitter?.id === 'register-button'
+
+            if (isLoginButton) {
+                handleLogin(login, password)
+            } else if (isRegisterButton) {
+                handleRegister(login, name, password)
+            }
+        })
+    }
+
     document
         .getElementById('comment-button')
         ?.addEventListener('click', handleCommentSubmit)
-    document
-        .getElementById('login-button')
-        ?.addEventListener('click', handleLogin)
-    document
-        .getElementById('register-button')
-        ?.addEventListener('click', handleRegister)
     document
         .getElementById('logout-button')
         ?.addEventListener('click', handleLogout)
@@ -74,39 +90,46 @@ function handleCommentSubmit() {
         .catch((err) => alert(err.message))
 }
 
-function handleLogin() {
-    const login = document.getElementById('login-input').value.trim()
-    const password = document.getElementById('password-input').value.trim()
+function handleLogin(login, password) {
     if (!login || !password) {
-        alert('Заполните все поля')
+        showErrorMessage('Введите логин и пароль')
         return
     }
+
     loginUser(login, password)
-        .then((data) => {
-            user = { name: data.user.name, token: data.user.token }
+        .then((response) => {
+            const user = {
+                name: response.user.name,
+                token: response.user.token,
+            }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
             renderComments(comments, user)
         })
-        .catch((err) => alert(err.message))
+        .catch((error) => {
+            showErrorMessage(error.message || 'Ошибка авторизации')
+        })
 }
 
-function handleRegister() {
-    const login = document.getElementById('login-input').value.trim()
-    const name = document.getElementById('name-input').value.trim()
-    const password = document.getElementById('password-input').value.trim()
+function handleRegister(login, name, password) {
     if (!login || !name || !password) {
-        alert('Заполните все поля')
+        showErrorMessage('Заполните все поля')
         return
     }
+
     registerUser(login, name, password)
-        .then((data) => {
-            user = { name: data.user.name, token: data.user.token }
+        .then((response) => {
+            const user = {
+                name: response.user.name,
+                token: response.user.token,
+            }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
             renderComments(comments, user)
         })
-        .catch((err) => alert(err.message))
+        .catch((error) => {
+            showErrorMessage(error.message || 'Ошибка регистрации')
+        })
 }
 
 function handleLogout() {
@@ -138,4 +161,12 @@ function addLikeEventListeners() {
             }
         })
     })
+}
+
+function showErrorMessage(message) {
+    const errorMessage = document.querySelector('.error-message')
+    if (errorMessage) {
+        errorMessage.textContent = message
+        errorMessage.style.display = 'block'
+    }
 }
