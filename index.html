@@ -9,21 +9,23 @@
     <body>
         <div id="app">
             <h1>Комментарии</h1>
-            <button id="logout-button" style="display: none">Выйти</button>
-            <ul id="comments-list"></ul>
-            <div id="comment-form" style="display: none">
+            <button id="logout-button" class="logout-button">Выйти</button>
+            <ul id="comments-list" class="comments-list"></ul>
+            <div id="comment-form" class="comment-form">
                 <h3>Добавить комментарий</h3>
                 <p>Вы вошли как: <span id="user-name" readonly></span></p>
                 <textarea
                     id="comment-text"
                     placeholder="Введите ваш комментарий"
                 ></textarea>
-                <button id="comment-button">Отправить</button>
+                <button id="comment-button" class="comment-button">
+                    Отправить
+                </button>
             </div>
-            <p id="login-required">
+            <p id="login-required" class="login-link">
                 Чтобы добавить комментарий, <a href="#">авторизуйтесь</a>
             </p>
-            <div id="auth-form-container" style="display: none"></div>
+            <div id="auth-form-container" class="auth-form-container"></div>
         </div>
 
         <script type="module" src="/modules/main.js"></script>

@@ -10,7 +10,7 @@ export const fetchComments = () => {
         .then((data) =>
             data.comments.map((comment) => ({
                 id: comment.id,
-                name: comment.author.name || 'Anonymous',
+                name: comment.author?.name || 'Anonymous',
                 date: comment.date,
                 text: comment.text,
                 likes: comment.likes,
@@ -36,6 +36,7 @@ export const postComment = (text) => {
     })
 }
 
+// Авторизация
 export const loginUser = (login, password) => {
     return fetch(`${authHost}/login`, {
         method: 'POST',
@@ -55,17 +56,5 @@ export const registerUser = (login, name, password) => {
     }).then(async (res) => {
         if (!res.ok) throw new Error('Ошибка регистрации')
         return await res.json()
-    })
-}
-
-export const likeComment = (id, token) => {
-    return fetch(`${commentsHost}/comments/${id}/like`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    }).then((res) => {
-        if (!res.ok) throw new Error('Не удалось поставить лайк')
-        return res.json()
     })
 }

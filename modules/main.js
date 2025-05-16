@@ -1,12 +1,5 @@
-import {
-    fetchComments,
-    postComment,
-    loginUser,
-    registerUser,
-    likeComment,
-} from './api.js'
+import { fetchComments, postComment, loginUser, registerUser } from './api.js'
 import { renderComments, renderLoginForm } from './render.js'
-import { sanitizeHTML } from './sanitize.js'
 
 let comments = []
 let user = null
@@ -24,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderLoginForm()
     }
 
-    // --- Обработчики событий ---
     const authForm = document.querySelector('.auth-form')
     if (authForm) {
         authForm.addEventListener('submit', (e) => {
@@ -59,8 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('auth-form-container').style.display =
                 'block'
         })
-
-    addLikeEventListeners()
 })
 
 function initApp() {
@@ -69,7 +59,9 @@ function initApp() {
             comments = fetchedComments
             renderComments(comments, user)
         })
-        .catch((err) => alert('Не удалось загрузить комментарии'))
+        .catch((err) => {
+            alert('Не удалось загрузить комментарии')
+        })
 }
 
 function handleCommentSubmit() {
@@ -87,12 +79,14 @@ function handleCommentSubmit() {
             comments = newComments
             renderComments(comments, user)
         })
-        .catch((err) => alert(err.message))
+        .catch((err) => {
+            alert(err.message || 'Ошибка отправки комментария')
+        })
 }
 
 function handleLogin(login, password) {
     if (!login || !password) {
-        showErrorMessage('Введите логин и пароль')
+        showErrorMessage('Заполните все поля')
         return
     }
 
@@ -138,29 +132,6 @@ function handleLogout() {
     localStorage.removeItem('userName')
     renderComments(comments, user)
     renderLoginForm()
-}
-
-function addLikeEventListeners() {
-    document.querySelectorAll('.like-button').forEach((button) => {
-        button.addEventListener('click', async (event) => {
-            const index = parseInt(event.target.dataset.index, 10)
-            const token = localStorage.getItem('authToken')
-
-            if (!token) {
-                alert('Требуется авторизация для лайков')
-                return
-            }
-
-            try {
-                const updatedData = await likeComment(comments[index].id, token)
-                comments[index].likes = updatedData.likes
-                comments[index].isLiked = !comments[index].isLiked
-                renderComments(comments, user)
-            } catch (error) {
-                alert(error.message)
-            }
-        })
-    })
 }
 
 function showErrorMessage(message) {

@@ -1,95 +1,62 @@
 import { loginUser, registerUser } from './api.js'
-import { sanitizeHTML } from './sanitize.js'
 
-export const login = ({ container, onSuccess }) => {
-    console.log('Rendering login form')
-
+export const login = ({ container, onLoginSuccess }) => {
     container.innerHTML = `
-        <h1>Вход</h1>
         <form class="auth-form">
-            <input type="text" class="auth-form-login" placeholder="Логин" required />
-            <input type="password" class="auth-form-password" placeholder="Пароль" required />
-            <button type="submit">Войти</button>
+            <h2>Вход</h2>
+            <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
+            <input type="password" id="password-input" placeholder="Пароль" autocomplete="current-password" required />
+            <button type="submit" id="login-button">Войти</button>
         </form>
-        <div class="error-message" style="display: none;"></div>
+        <div class="error-message" style="color: red;"></div>
     `
 
     const form = container.querySelector('.auth-form')
-    const loginInput = container.querySelector('.auth-form-login')
-    const passwordInput = container.querySelector('.auth-form-password')
+    const loginInput = container.querySelector('#login-input')
+    const passwordInput = container.querySelector('#password-input')
     const errorMessage = container.querySelector('.error-message')
-
-    if (!form || !loginInput || !passwordInput || !errorMessage) {
-        console.error('Login form elements not found:', {
-            form,
-            loginInput,
-            passwordInput,
-            errorMessage,
-        })
-        return
-    }
 
     form.addEventListener('submit', (e) => {
         e.preventDefault()
         const login = loginInput.value.trim()
         const password = passwordInput.value.trim()
 
-        console.log('Submitting login form with:', { login, password })
-
         if (!login || !password) {
-            errorMessage.textContent = 'Введите логин и пароль'
+            errorMessage.textContent = 'Заполните все поля'
             errorMessage.style.display = 'block'
-            console.log('Validation failed: login or password is empty')
             return
         }
 
         loginUser(login, password)
-            .then((data) => {
-                console.log('Login successful, received data:', data)
-                localStorage.setItem('authToken', data.user.token)
-                localStorage.setItem('userName', data.user.name)
-                onSuccess()
+            .then((response) => {
+                localStorage.setItem('authToken', response.user.token)
+                localStorage.setItem('userName', response.user.name)
+                onLoginSuccess()
             })
             .catch((error) => {
-                console.error('Login error:', error)
-                errorMessage.textContent = sanitizeHTML(
-                    error.message || 'Не удалось авторизоваться',
-                )
+                errorMessage.textContent = error.message || 'Ошибка входа'
                 errorMessage.style.display = 'block'
             })
     })
 }
 
-export const register = ({ container, onSuccess }) => {
-    console.log('Rendering register form')
-
+export const register = ({ container, onRegisterSuccess }) => {
     container.innerHTML = `
-        <h1>Регистрация</h1>
         <form class="auth-form">
-            <input type="text" class="auth-form-login" placeholder="Логин" required />
-            <input type="text" class="auth-form-name" placeholder="Имя" required />
-            <input type="password" class="auth-form-password" placeholder="Пароль" required />
-            <button type="submit">Зарегистрироваться</button>
+            <h2>Регистрация</h2>
+            <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
+            <input type="text" id="name-input" placeholder="Имя" autocomplete="name" required />
+            <input type="password" id="password-input" placeholder="Пароль" autocomplete="new-password" required />
+            <button type="submit" id="register-button">Зарегистрироваться</button>
         </form>
-        <div class="error-message" style="display: none;"></div>
+        <div class="error-message" style="color: red;"></div>
     `
 
     const form = container.querySelector('.auth-form')
-    const loginInput = container.querySelector('.auth-form-login')
-    const nameInput = container.querySelector('.auth-form-name')
-    const passwordInput = container.querySelector('.auth-form-password')
+    const loginInput = container.querySelector('#login-input')
+    const nameInput = container.querySelector('#name-input')
+    const passwordInput = container.querySelector('#password-input')
     const errorMessage = container.querySelector('.error-message')
-
-    if (!form || !loginInput || !nameInput || !passwordInput || !errorMessage) {
-        console.error('Register form elements not found:', {
-            form,
-            loginInput,
-            nameInput,
-            passwordInput,
-            errorMessage,
-        })
-        return
-    }
 
     form.addEventListener('submit', (e) => {
         e.preventDefault()
@@ -97,27 +64,20 @@ export const register = ({ container, onSuccess }) => {
         const name = nameInput.value.trim()
         const password = passwordInput.value.trim()
 
-        console.log('Submitting register form with:', { login, name, password })
-
         if (!login || !name || !password) {
             errorMessage.textContent = 'Заполните все поля'
             errorMessage.style.display = 'block'
-            console.log('Validation failed: some fields are empty')
             return
         }
 
         registerUser(login, name, password)
-            .then((data) => {
-                console.log('Registration successful, received data:', data)
-                localStorage.setItem('authToken', data.user.token)
-                localStorage.setItem('userName', data.user.name)
-                onSuccess()
+            .then((response) => {
+                localStorage.setItem('authToken', response.user.token)
+                localStorage.setItem('userName', response.user.name)
+                onRegisterSuccess()
             })
             .catch((error) => {
-                console.error('Registration error:', error)
-                errorMessage.textContent = sanitizeHTML(
-                    error.message || 'Не удалось зарегистрироваться',
-                )
+                errorMessage.textContent = error.message || 'Ошибка регистрации'
                 errorMessage.style.display = 'block'
             })
     })

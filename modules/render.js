@@ -6,8 +6,8 @@ export const renderComments = (comments, user) => {
 
     commentsList.innerHTML = comments
         .map(
-            (comment, index) => `
-            <li class="comment" data-index="${index}">
+            (comment) => `
+            <li class="comment">
                 <div class="comment-header">
                     <span>${sanitizeHTML(comment.name)}</span>
                     <span>${new Date(comment.date).toLocaleString()}</span>
@@ -16,10 +16,8 @@ export const renderComments = (comments, user) => {
                     <p>${sanitizeHTML(comment.text)}</p>
                 </div>
                 <div class="comment-footer">
-                    <div class="likes">
-                        <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}">❤️</button>
-                        <span class="likes-counter">${comment.likes}</span>
-                    </div>
+                    <span>Лайки: ${comment.likes}</span>
+                    <span>${comment.isLiked ? '❤️' : '🤍'}</span>
                 </div>
             </li>
         `,
@@ -55,11 +53,10 @@ export const renderLoginForm = () => {
         <form class="auth-form">
             <h2>Авторизация / Регистрация</h2>
             <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
-            <input type="text" id="name-input" placeholder="Имя (для регистрации)" autocomplete="name" required />
+            <input type="text" id="name-input" placeholder="Имя (для регистрации)" required />
             <input type="password" id="password-input" placeholder="Пароль" autocomplete="current-password" required />
             <button type="submit" id="login-button">Войти</button>
             <button type="submit" id="register-button">Зарегистрироваться</button>
-            <div class="error-message" style="color: red;"></div>
         </form>
     `
 }
