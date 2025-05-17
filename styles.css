@@ -239,3 +239,8 @@ h1 {
     max-width: 596px;
     width: 100%;
 }
+
+/* Контейнер формы авторизации */
+#auth-form-container {
+    display: none;
+}

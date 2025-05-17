@@ -2,8 +2,14 @@ import { sanitizeHTML } from './sanitize.js'
 
 export const renderComments = (comments, user) => {
     const commentsList = document.getElementById('comments-list')
+    const commentForm = document.getElementById('comment-form')
+    const authContainer = document.getElementById('auth-form-container')
+    const logoutButton = document.getElementById('logout-button')
+    const loginRequired = document.getElementById('login-required')
+
     if (!commentsList) return
 
+    // Рендерим список комментариев
     commentsList.innerHTML = comments
         .map(
             (comment) => `
@@ -24,24 +30,27 @@ export const renderComments = (comments, user) => {
         )
         .join('')
 
-    const commentForm = document.getElementById('comment-form')
-    if (commentForm) {
-        commentForm.style.display = user ? 'block' : 'none'
+    // Управляем видимостью элементов
+    if (user) {
+        // Пользователь авторизован
+        commentsList.style.display = 'block'
+        commentForm.style.display = 'block'
+        authContainer.style.display = 'none'
+        logoutButton.style.display = 'block'
+        loginRequired.style.display = 'none'
+
         const userNameSpan = document.getElementById('user-name')
-        if (userNameSpan && user) {
+        if (userNameSpan) {
             userNameSpan.textContent = user.name
             userNameSpan.readOnly = true
         }
-    }
-
-    const authContainer = document.getElementById('auth-form-container')
-    if (authContainer) {
-        authContainer.style.display = user ? 'none' : 'block'
-    }
-
-    const logoutButton = document.getElementById('logout-button')
-    if (logoutButton) {
-        logoutButton.style.display = user ? 'block' : 'none'
+    } else {
+        // Пользователь не авторизован
+        commentsList.style.display = 'block'
+        commentForm.style.display = 'none'
+        authContainer.style.display = 'none' // Скрываем по умолчанию
+        logoutButton.style.display = 'none'
+        loginRequired.style.display = 'block'
     }
 }
 
@@ -58,5 +67,6 @@ export const renderLoginForm = () => {
             <button type="submit" id="login-button">Войти</button>
             <button type="submit" id="register-button">Зарегистрироваться</button>
         </form>
+        <div class="error-message" style="color: red;"></div>
     `
 }

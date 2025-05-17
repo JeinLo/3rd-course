@@ -12,6 +12,7 @@ export const renderLogin = ({ container, onLoginSuccess }) => {
             <input type="password" class="login-form-password" placeholder="Пароль" required autocomplete="new-password" />
             <button type="submit" class="login-form-button">Войти</button>
         </form>
+        <p>Нет аккаунта? <a href="#" id="switch-to-register">Зарегистрируйтесь</a></p>
         <div class="error-message" style="display: none; color: #ff3333; text-align: center; margin-top: 10px;"></div>
     `
 

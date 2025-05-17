@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initApp()
 
     if (!user) {
-        renderLoginForm()
+        renderComments(comments, user) // Показываем комментарии и текст "авторизуйтесь"
     }
 
     const authForm = document.querySelector('.auth-form')
@@ -48,8 +48,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         .getElementById('login-required')
         ?.addEventListener('click', (e) => {
             e.preventDefault()
+            // Показываем форму авторизации
             document.getElementById('auth-form-container').style.display =
                 'block'
+            // Скрываем список комментариев
+            document.getElementById('comments-list').style.display = 'none'
+            // Скрываем форму добавления комментария
+            document.getElementById('comment-form').style.display = 'none'
+            // Скрываем кнопку "Выйти"
+            document.getElementById('logout-button').style.display = 'none'
+            // Скрываем текст "Чтобы добавить комментарий, авторизуйтесь"
+            document.getElementById('login-required').style.display = 'none'
+            // Рендерим форму авторизации
+            renderLoginForm()
         })
 })
 
@@ -92,12 +103,13 @@ function handleLogin(login, password) {
 
     loginUser(login, password)
         .then((response) => {
-            const user = {
+            user = {
                 name: response.user.name,
                 token: response.user.token,
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
+            // Обновляем интерфейс
             renderComments(comments, user)
         })
         .catch((error) => {
@@ -113,12 +125,13 @@ function handleRegister(login, name, password) {
 
     registerUser(login, name, password)
         .then((response) => {
-            const user = {
+            user = {
                 name: response.user.name,
                 token: response.user.token,
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
+            // Обновляем интерфейс
             renderComments(comments, user)
         })
         .catch((error) => {
@@ -131,7 +144,6 @@ function handleLogout() {
     localStorage.removeItem('authToken')
     localStorage.removeItem('userName')
     renderComments(comments, user)
-    renderLoginForm()
 }
 
 function showErrorMessage(message) {
