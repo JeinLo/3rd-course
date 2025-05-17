@@ -1,32 +1,12 @@
-.hidden {
-    display: none;
-}
-
-@keyframes rotating {
-    from {
-        transform: rotate(0deg);
-    }
-    25% {
-        transform: rotate(30deg);
-    }
-    75% {
-        transform: rotate(-30deg);
-    }
-    to {
-        transform: rotate(0deg);
-    }
-}
-
-.animation {
-    animation: rotating 2s linear infinite;
-}
-
+/* Базовые стили */
 body {
     margin: 0;
     background: #202020;
+    color: #ffffff;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
-.container {
+#app {
     font-family: Helvetica;
     color: #ffffff;
     display: flex;
@@ -40,14 +20,18 @@ body {
     box-sizing: border-box;
 }
 
-.comments,
-.comment {
+/* Заголовок */
+h1 {
+    font-size: 32px;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+/* Список комментариев */
+#comments-list {
     margin: 0;
     padding: 0;
     list-style: none;
-}
-
-.comments {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -55,8 +39,8 @@ body {
     width: 100%;
 }
 
-.comment,
-.add-form {
+/* Комментарий */
+.comment {
     width: 100%;
     max-width: 596px;
     box-sizing: border-box;
@@ -67,9 +51,6 @@ body {
     );
     filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
     border-radius: 20px;
-}
-
-.comment {
     padding: 48px;
     border: 1px solid #ddd;
     margin-bottom: 10px;
@@ -80,6 +61,7 @@ body {
     display: flex;
     justify-content: space-between;
     font-weight: bold;
+    color: #ffffff;
 }
 
 .comment-body {
@@ -87,8 +69,10 @@ body {
     margin-bottom: 32px;
 }
 
-.comment-text {
+.comment-body p {
     font-size: 32px;
+    margin: 0;
+    color: #ffffff;
 }
 
 .comment-footer {
@@ -96,6 +80,7 @@ body {
     justify-content: flex-end;
 }
 
+/* Лайки */
 .likes {
     display: flex;
     align-items: center;
@@ -104,6 +89,7 @@ body {
 .likes-counter {
     font-size: 26px;
     margin-right: 8px;
+    color: #ffffff;
 }
 
 .like-button {
@@ -124,7 +110,68 @@ body {
     fill: #ff6347;
 }
 
-.add-form {
+/* Форма добавления комментария */
+#comment-form {
+    width: 100%;
+    max-width: 596px;
+    box-sizing: border-box;
+    background: radial-gradient(
+        75.42% 75.42% at 50% 42.37%,
+        rgba(53, 53, 53, 0) 22.92%,
+        #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 64px;
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#comment-form h3 {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    color: #ffffff;
+}
+
+#comment-form p {
+    font-size: 16px;
+    margin: 0 0 16px 0;
+    color: #ffffff;
+}
+
+#user-name {
+    font-weight: bold;
+    color: #bcec30;
+}
+
+#comment-text {
+    font-size: 16px;
+    font-family: Helvetica;
+    border-radius: 8px;
+    border: none;
+    padding: 22px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    min-height: 100px;
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Форма авторизации */
+.auth-form {
+    width: 100%;
+    max-width: 596px;
+    box-sizing: border-box;
+    background: radial-gradient(
+        75.42% 75.42% at 50% 42.37%,
+        rgba(53, 53, 53, 0) 22.92%,
+        #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
     padding: 20px;
     margin-top: 64px;
     display: flex;
@@ -132,8 +179,7 @@ body {
     gap: 16px;
 }
 
-.add-form-name,
-.add-form-text {
+.auth-form input {
     font-size: 16px;
     font-family: Helvetica;
     border-radius: 8px;
@@ -141,21 +187,19 @@ body {
     padding: 11px 22px;
     width: 100%;
     box-sizing: border-box;
+    background: #ffffff;
+    color: #000000;
 }
 
-.add-form-text {
-    margin-top: 0;
-    padding: 22px;
-    resize: none;
-    min-height: 100px;
+.auth-form input:not(:last-child) {
+    margin-bottom: 16px;
 }
 
-.add-form-row {
-    display: flex;
-    justify-content: flex-end;
+.auth-form input::placeholder {
+    color: #aaa;
 }
 
-.add-form-button {
+.auth-form button {
     margin-top: 16px;
     font-size: 24px;
     padding: 10px 20px;
@@ -163,24 +207,40 @@ body {
     border: none;
     border-radius: 18px;
     cursor: pointer;
-    width: auto;
+    color: #202020;
 }
 
-.add-form-button:hover {
+.auth-form button:hover {
     opacity: 0.9;
 }
 
-.add-form-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+/* Кнопка "Выйти" */
+#logout-button {
+    margin: 20px 0;
+    font-size: 18px;
+    padding: 8px 16px;
+    background-color: #ff6347;
+    color: #ffffff;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
 }
 
-#loading-indicator,
-#loading-message {
+#logout-button:hover {
+    opacity: 0.9;
+}
+
+/* Сообщение о загрузке */
+.loading-indicator {
     font-size: 16px;
     color: #666;
     text-align: center;
     margin: 24px 0;
     max-width: 596px;
     width: 100%;
+}
+
+/* Контейнер формы авторизации */
+#auth-form-container {
+    display: none;
 }
