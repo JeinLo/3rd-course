@@ -9,7 +9,6 @@ export const renderComments = (comments, user) => {
 
     if (!commentsList) return
 
-    // Рендерим список комментариев
     commentsList.innerHTML = comments
         .map(
             (comment) => `
@@ -22,17 +21,19 @@ export const renderComments = (comments, user) => {
                     <p>${sanitizeHTML(comment.text)}</p>
                 </div>
                 <div class="comment-footer">
-                    <span>Лайки: ${comment.likes}</span>
-                    <span>${comment.isLiked ? '❤️' : '🤍'}</span>
+                    <div class="likes">
+                        <span class="likes-counter">Лайки: ${comment.likes}</span>
+                        <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-comment-id="${comment.id}">
+                            ${comment.isLiked ? '❤️' : '🤍'}
+                        </button>
+                    </div>
                 </div>
             </li>
         `,
         )
         .join('')
 
-    // Управляем видимостью элементов
     if (user) {
-        // Пользователь авторизован
         commentsList.style.display = 'block'
         commentForm.style.display = 'block'
         authContainer.style.display = 'none'
@@ -45,10 +46,9 @@ export const renderComments = (comments, user) => {
             userNameSpan.readOnly = true
         }
     } else {
-        // Пользователь не авторизован
         commentsList.style.display = 'block'
         commentForm.style.display = 'none'
-        authContainer.style.display = 'none' // Скрываем по умолчанию
+        authContainer.style.display = 'none'
         logoutButton.style.display = 'none'
         loginRequired.style.display = 'block'
     }
@@ -60,13 +60,29 @@ export const renderLoginForm = () => {
 
     container.innerHTML = `
         <form class="auth-form">
-            <h2>Авторизация / Регистрация</h2>
+            <h2>Авторизация</h2>
             <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
-            <input type="text" id="name-input" placeholder="Имя (для регистрации)" required />
             <input type="password" id="password-input" placeholder="Пароль" autocomplete="current-password" required />
             <button type="submit" id="login-button">Войти</button>
+        </form>
+        <p>Нет аккаунта? <a href="#" id="switch-to-register" class="auth-form-switch">Зарегистрируйтесь</a></p>
+        <div class="error-message" style="color: red;"></div>
+    `
+}
+
+export const renderRegisterForm = () => {
+    const container = document.getElementById('auth-form-container')
+    if (!container) return
+
+    container.innerHTML = `
+        <form class="auth-form">
+            <h2>Регистрация</h2>
+            <input type="text" id="login-input" placeholder="Логин" autocomplete="username" required />
+            <input type="text" id="name-input" placeholder="Имя" autocomplete="name" required />
+            <input type="password" id="password-input" placeholder="Пароль" autocomplete="new-password" required />
             <button type="submit" id="register-button">Зарегистрироваться</button>
         </form>
+        <p>Уже есть аккаунт? <a href="#" id="switch-to-login" class="auth-form-switch">Войдите</a></p>
         <div class="error-message" style="color: red;"></div>
     `
 }

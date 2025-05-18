@@ -78,6 +78,8 @@ h1 {
 .comment-footer {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Лайки */
@@ -92,24 +94,6 @@ h1 {
     color: #ffffff;
 }
 
-.like-button {
-    all: unset;
-    cursor: pointer;
-    margin-left: 10px;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-}
-
-.like-button svg {
-    fill: #bcec30;
-}
-
-.-active-like svg {
-    fill: #ff6347;
-}
-
 /* Форма добавления комментария */
 #comment-form {
     width: 100%;
@@ -121,8 +105,8 @@ h1 {
         #7334ea 100%
     );
     filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 30px;
+    padding: 24px;
     margin-top: 64px;
     display: none;
     flex-direction: column;
@@ -158,6 +142,31 @@ h1 {
     min-height: 100px;
     background: #ffffff;
     color: #000000;
+}
+
+.comment-button {
+    font-size: 20px;
+    padding: 12px 24px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    color: #202020;
+    width: 200px;
+    align-self: flex-end;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.2s,
+        opacity 0.2s;
+}
+
+.comment-button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.comment-button:active {
+    transform: scale(0.95);
 }
 
 /* Форма авторизации */
@@ -212,6 +221,17 @@ h1 {
 
 .auth-form button:hover {
     opacity: 0.9;
+}
+
+/* Ссылки переключения форм */
+.auth-form-switch {
+    color: #bcec30;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.auth-form-switch:hover {
+    text-decoration: underline;
 }
 
 /* Кнопка "Выйти" */
