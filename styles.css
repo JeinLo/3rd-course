@@ -78,8 +78,6 @@ h1 {
 .comment-footer {
     display: flex;
     justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
 }
 
 /* Лайки */
@@ -92,6 +90,30 @@ h1 {
     font-size: 26px;
     margin-right: 8px;
     color: #ffffff;
+}
+
+.like-button {
+    all: unset;
+    cursor: pointer;
+    margin-left: 10px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    background: transparent; /* Убираем фон */
+    outline: none; /* Убираем обводку при фокусе */
+}
+
+.like-button:focus {
+    outline: none; /* Убираем обводку фокуса */
+}
+
+.like-button svg {
+    fill: #bcec30;
+}
+
+.-active-like svg {
+    fill: #ff6347;
 }
 
 /* Форма добавления комментария */

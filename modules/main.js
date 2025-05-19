@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initApp()
 
     if (!user) {
-        renderComments(comments, user) // Показываем комментарии и текст "авторизуйтесь"
+        renderComments(comments, user)
     }
 
     document
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             setupFormHandlers()
         })
 
-    // Обработчики переключения форм
     document
         .getElementById('auth-form-container')
         .addEventListener('click', (e) => {
@@ -135,21 +134,19 @@ function handleCommentSubmit() {
 }
 
 function handleLike(commentId, likeButton) {
-    // Локально обновляем иконку и стиль
+    // Сохраняем текущее состояние
     const isCurrentlyLiked = likeButton.classList.contains('-active-like')
-    likeButton.classList.toggle('-active-like')
-    likeButton.textContent = isCurrentlyLiked ? '🤍' : '❤️'
+    const originalText = likeButton.textContent
 
-    // Обновляем счётчик лайков локально
-    const likesCounter = likeButton
-        .closest('.likes')
-        .querySelector('.likes-counter')
-    const currentLikes = parseInt(
-        likesCounter.textContent.replace('Лайки: ', ''),
-    )
-    likesCounter.textContent = `Лайки: ${isCurrentlyLiked ? currentLikes - 1 : currentLikes + 1}`
+    // Локально обновляем массив comments
+    const comment = comments.find((c) => c.id === commentId)
+    if (comment) {
+        comment.isLiked = !isCurrentlyLiked
+        comment.likes = isCurrentlyLiked ? comment.likes - 1 : comment.likes + 1
+        // Перерисовываем сразу, чтобы сердечко "застывало"
+        renderComments(comments, user)
+    }
 
-    // Отправляем запрос на сервер
     likeComment(commentId)
         .then(() => fetchComments())
         .then((newComments) => {
@@ -157,10 +154,15 @@ function handleLike(commentId, likeButton) {
             renderComments(comments, user)
         })
         .catch((err) => {
-            // В случае ошибки откатываем локальные изменения
+            if (comment) {
+                comment.isLiked = isCurrentlyLiked
+                comment.likes = isCurrentlyLiked
+                    ? comment.likes + 1
+                    : comment.likes - 1
+            }
             likeButton.classList.toggle('-active-like')
-            likeButton.textContent = isCurrentlyLiked ? '❤️' : '🤍'
-            likesCounter.textContent = `Лайки: ${currentLikes}`
+            likeButton.textContent = originalText
+            renderComments(comments, user)
             alert(err.message || 'Ошибка при обработке лайка')
         })
 }
@@ -179,7 +181,6 @@ function handleLogin(login, password) {
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
-            // Обновляем интерфейс
             renderComments(comments, user)
         })
         .catch((error) => {
@@ -201,7 +202,6 @@ function handleRegister(login, name, password) {
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
-            // Обновляем интерфейс
             renderComments(comments, user)
         })
         .catch((error) => {

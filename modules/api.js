@@ -5,6 +5,9 @@ export async function fetchComments() {
     try {
         const response = await fetch(`${commentsHost}/comments`, {
             method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache', // Предотвращаем кэширование
+            },
         })
 
         if (!response.ok) {
@@ -134,6 +137,7 @@ export async function likeComment(commentId) {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    'Cache-Control': 'no-cache', // Предотвращаем кэширование
                 },
             },
         )
