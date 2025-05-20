@@ -9,6 +9,8 @@ export const renderComments = (comments, user) => {
 
     if (!commentsList) return
 
+    console.log('Rendering comments:', comments)
+
     commentsList.innerHTML = comments
         .map(
             (comment) => `
@@ -24,7 +26,7 @@ export const renderComments = (comments, user) => {
                     <div class="likes">
                         <span class="likes-counter">Лайки: ${comment.likes}</span>
                         <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-comment-id="${comment.id}">
-                            ${comment.isLiked ? '❤️' : '🤍'}
+                            <span>${comment.isLiked ? '❤️' : '🤍'}</span>
                         </button>
                     </div>
                 </div>
@@ -34,23 +36,22 @@ export const renderComments = (comments, user) => {
         .join('')
 
     if (user) {
-        commentsList.style.display = 'block'
-        commentForm.style.display = 'block'
-        authContainer.style.display = 'none'
-        logoutButton.style.display = 'block'
-        loginRequired.style.display = 'none'
-
-        const userNameSpan = document.getElementById('user-name')
-        if (userNameSpan) {
-            userNameSpan.textContent = user.name
-            userNameSpan.readOnly = true
+        if (commentForm) {
+            commentForm.style.display = 'block'
+            const userNameSpan = document.getElementById('user-name')
+            if (userNameSpan) {
+                userNameSpan.textContent = user.name
+                userNameSpan.readOnly = true
+            }
         }
+        if (logoutButton) logoutButton.style.display = 'block'
+        if (authContainer) authContainer.style.display = 'none'
+        if (loginRequired) loginRequired.style.display = 'none'
     } else {
-        commentsList.style.display = 'block'
-        commentForm.style.display = 'none'
-        authContainer.style.display = 'none'
-        logoutButton.style.display = 'none'
-        loginRequired.style.display = 'block'
+        if (commentForm) commentForm.style.display = 'none'
+        if (logoutButton) logoutButton.style.display = 'none'
+        if (authContainer) authContainer.style.display = 'none'
+        if (loginRequired) loginRequired.style.display = 'block'
     }
 }
 

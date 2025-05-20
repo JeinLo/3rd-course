@@ -1,99 +1,89 @@
 const commentsHost = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
 const authHost = 'https://wedev-api.sky.pro/api/user'
 
-export async function fetchComments() {
-    try {
-        const response = await fetch(`${commentsHost}/comments`, {
-            method: 'GET',
-            headers: {
-                'Cache-Control': 'no-cache', // Предотвращаем кэширование
-            },
+// Получение списка комментариев
+export const fetchComments = () => {
+    return fetch(`${commentsHost}/comments`, {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache',
+        },
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Не удалось загрузить комментарии')
+            }
+            return res.json()
         })
-
-        if (!response.ok) {
-            throw new Error('Ошибка загрузки комментариев')
-        }
-
-        const { comments } = await response.json()
-        return comments.map((comment) => ({
-            id: comment.id,
-            name: comment.author.name,
-            date: comment.date,
-            text: comment.text,
-            likes: comment.likes,
-            isLiked: comment.isLiked,
-        }))
-    } catch (error) {
-        throw new Error(error.message || 'Ошибка сети')
-    }
+        .then((data) => {
+            console.log('fetchComments response:', data.comments)
+            return data.comments.map((comment) => ({
+                id: comment.id,
+                name: comment.author?.name || 'Anonymous',
+                date: comment.date,
+                text: comment.text,
+                likes: comment.likes,
+                isLiked: comment.isLiked || false,
+            }))
+        })
 }
 
-export async function postComment(text) {
+// Добавление нового комментария
+export const postComment = (text) => {
     const token = localStorage.getItem('authToken')
     if (!token) {
         throw new Error('Требуется авторизация')
     }
 
-    try {
-        const response = await fetch(`${commentsHost}/comments`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                text,
-            }),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Ошибка отправки комментария')
-        }
-
-        return response.json()
-    } catch (error) {
-        throw new Error(error.message || 'Ошибка сети')
-    }
-}
-
-export async function loginUser(login, password) {
-    try {
-        const res = await fetch(`${authHost}/login`, {
-            method: 'POST',
-            body: JSON.stringify({
-                login,
-                password,
-            }),
-        })
-
+    return fetch(`${commentsHost}/comments`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+    }).then((res) => {
         if (!res.ok) {
-            const errorData = await res.json()
-            if (res.status === 400) {
-                throw new Error(errorData.error || 'Неверный логин или пароль')
+            if (res.status === 401) {
+                localStorage.removeItem('authToken')
+                localStorage.removeItem('userName')
+                throw new Error('Требуется авторизация')
             }
-            throw new Error(errorData.error || 'Ошибка сервера')
+            throw new Error('Не удалось отправить комментарий')
         }
-
         return res.json()
-    } catch (error) {
-        throw new Error(error.message || 'Ошибка сети')
-    }
+    })
 }
 
-export async function registerUser(login, name, password) {
-    try {
-        const res = await fetch(`${authHost}`, {
-            method: 'POST',
-            body: JSON.stringify({
-                login,
-                name,
-                password,
-            }),
-        })
-
+// Авторизация пользователя
+export const loginUser = (login, password) => {
+    return fetch(`${authHost}/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ login, password }),
+    }).then((res) => {
         if (!res.ok) {
-            const errorData = await res.json()
-            if (res.status === 400) {
+            return res.json().then((errorData) => {
+                throw new Error(errorData.error || 'Неверный логин или пароль')
+            })
+        }
+        return res.json()
+    })
+}
+
+// Регистрация пользователя
+export const registerUser = (login, name, password) => {
+    return fetch(`${authHost}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ login, name, password }),
+    }).then((res) => {
+        if (!res.ok) {
+            return res.json().then((errorData) => {
                 if (
                     errorData.error &&
                     errorData.error.includes('already exists')
@@ -109,46 +99,62 @@ export async function registerUser(login, name, password) {
                         'Пароль слишком короткий или не соответствует требованиям',
                     )
                 } else {
-                    throw new Error(
-                        errorData.error ||
-                            'Ошибка регистрации: неверные данные',
-                    )
+                    throw new Error(errorData.error || 'Ошибка регистрации')
                 }
-            }
-            throw new Error(errorData.error || 'Ошибка сервера')
+            })
         }
-
         return res.json()
-    } catch (error) {
-        throw new Error(error.message || 'Ошибка сети')
-    }
+    })
 }
 
-export async function likeComment(commentId) {
+// Лайк комментария
+export const likeComment = (commentId) => {
     const token = localStorage.getItem('authToken')
     if (!token) {
         throw new Error('Требуется авторизация')
     }
 
-    try {
-        const response = await fetch(
-            `${commentsHost}/comments/${commentId}/toggle-like`,
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Cache-Control': 'no-cache', // Предотвращаем кэширование
+    return fetch(`${commentsHost}/comments/${commentId}/toggle-like`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+        },
+    })
+        .then((res) => {
+            console.log(
+                'Like response status:',
+                res.status,
+                'Comment ID:',
+                commentId,
+            )
+            if (!res.ok) {
+                return res.text().then((text) => {
+                    try {
+                        const errorData = JSON.parse(text)
+                        if (res.status === 401) {
+                            throw new Error('Требуется авторизация')
+                        }
+                        throw new Error(
+                            errorData.error || 'Не удалось поставить лайк',
+                        )
+                    } catch (e) {
+                        throw new Error(
+                            'Сервер вернул некорректный ответ: ' +
+                                text.slice(0, 100),
+                        )
+                    }
+                })
+            }
+            return res.json()
+        })
+        .then((result) => {
+            console.log('likeComment response:', result)
+            return {
+                result: {
+                    likes: result.result?.likes || 0,
+                    isLiked: result.result?.isLiked || false,
                 },
-            },
-        )
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Ошибка обработки лайка')
-        }
-
-        return response.json()
-    } catch (error) {
-        throw new Error(error.message || 'Ошибка сети')
-    }
+            }
+        })
 }

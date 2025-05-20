@@ -37,18 +37,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         .getElementById('login-required')
         ?.addEventListener('click', (e) => {
             e.preventDefault()
-            // Показываем форму авторизации
             document.getElementById('auth-form-container').style.display =
                 'block'
-            // Скрываем список комментариев
             document.getElementById('comments-list').style.display = 'none'
-            // Скрываем форму добавления комментария
             document.getElementById('comment-form').style.display = 'none'
-            // Скрываем кнопку "Выйти"
             document.getElementById('logout-button').style.display = 'none'
-            // Скрываем текст "Чтобы добавить комментарий, авторизуйтесь"
             document.getElementById('login-required').style.display = 'none'
-            // Рендерим форму логина
             renderLoginForm()
             setupFormHandlers()
         })
@@ -67,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         })
 
-    // Обработчик кликов по лайкам
     document.getElementById('comments-list').addEventListener('click', (e) => {
         const likeButton = e.target.closest('.like-button')
         if (likeButton && user) {
@@ -134,36 +127,50 @@ function handleCommentSubmit() {
 }
 
 function handleLike(commentId, likeButton) {
-    // Сохраняем текущее состояние
     const isCurrentlyLiked = likeButton.classList.contains('-active-like')
-    const originalText = likeButton.textContent
-
-    // Локально обновляем массив comments
-    const comment = comments.find((c) => c.id === commentId)
-    if (comment) {
-        comment.isLiked = !isCurrentlyLiked
-        comment.likes = isCurrentlyLiked ? comment.likes - 1 : comment.likes + 1
-        // Перерисовываем сразу, чтобы сердечко "застывало"
-        renderComments(comments, user)
-    }
+    likeButton.disabled = true
+    likeButton.classList.toggle('-active-like')
+    likeButton.querySelector('span').textContent = isCurrentlyLiked
+        ? '🤍'
+        : '❤️'
 
     likeComment(commentId)
-        .then(() => fetchComments())
-        .then((newComments) => {
-            comments = newComments
+        .then((response) => {
+            console.log(
+                'Like request successful for comment:',
+                commentId,
+                'Response:',
+                response,
+            )
+            // Обновляем локальный массив comments
+            comments = comments.map((comment) =>
+                comment.id === commentId
+                    ? {
+                          ...comment,
+                          likes: isCurrentlyLiked
+                              ? comment.likes - 1
+                              : comment.likes + 1, // Локально обновляем likes
+                          isLiked: !isCurrentlyLiked, // Локально переключаем isLiked
+                      }
+                    : comment,
+            )
             renderComments(comments, user)
         })
         .catch((err) => {
-            if (comment) {
-                comment.isLiked = isCurrentlyLiked
-                comment.likes = isCurrentlyLiked
-                    ? comment.likes + 1
-                    : comment.likes - 1
-            }
             likeButton.classList.toggle('-active-like')
-            likeButton.textContent = originalText
-            renderComments(comments, user)
-            alert(err.message || 'Ошибка при обработке лайка')
+            likeButton.querySelector('span').textContent = isCurrentlyLiked
+                ? '❤️'
+                : '🤍'
+            console.error('Like error:', err.message, 'Comment ID:', commentId)
+            if (err.message.includes('Требуется авторизация')) {
+                alert('Ваша сессия истекла. Пожалуйста, войдите снова.')
+                handleLogout()
+            } else {
+                alert(err.message || 'Ошибка при обработке лайка')
+            }
+        })
+        .finally(() => {
+            likeButton.disabled = false
         })
 }
 

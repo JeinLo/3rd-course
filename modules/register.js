@@ -1,6 +1,6 @@
 import { loadAndRenderComments } from './main.js'
 
-const authHost = 'https://wedev-api.sky.pro/api/user '
+const authHost = 'https://wedev-api.sky.pro/api/user'
 
 export const renderRegister = ({ container, onRegisterSuccess }) => {
     container.innerHTML = `
