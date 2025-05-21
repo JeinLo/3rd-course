@@ -142,15 +142,14 @@ function handleLike(commentId, likeButton) {
                 'Response:',
                 response,
             )
-            // Обновляем локальный массив comments
             comments = comments.map((comment) =>
                 comment.id === commentId
                     ? {
                           ...comment,
                           likes: isCurrentlyLiked
                               ? comment.likes - 1
-                              : comment.likes + 1, // Локально обновляем likes
-                          isLiked: !isCurrentlyLiked, // Локально переключаем isLiked
+                              : comment.likes + 1,
+                          isLiked: !isCurrentlyLiked,
                       }
                     : comment,
             )
@@ -188,9 +187,19 @@ function handleLogin(login, password) {
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
+            return fetchComments()
+        })
+        .then((fetchedComments) => {
+            console.log('Comments after login:', fetchedComments)
+            comments = fetchedComments
+            const commentsList = document.getElementById('comments-list')
+            if (commentsList) {
+                commentsList.style.display = 'block'
+            }
             renderComments(comments, user)
         })
         .catch((error) => {
+            console.error('Login error:', error.message)
             showErrorMessage(error.message || 'Ошибка авторизации')
         })
 }
@@ -209,9 +218,19 @@ function handleRegister(login, name, password) {
             }
             localStorage.setItem('authToken', user.token)
             localStorage.setItem('userName', user.name)
+            return fetchComments()
+        })
+        .then((fetchedComments) => {
+            console.log('Comments after register:', fetchedComments)
+            comments = fetchedComments
+            const commentsList = document.getElementById('comments-list')
+            if (commentsList) {
+                commentsList.style.display = 'block'
+            }
             renderComments(comments, user)
         })
         .catch((error) => {
+            console.error('Register error:', error.message)
             showErrorMessage(error.message || 'Ошибка регистрации')
         })
 }

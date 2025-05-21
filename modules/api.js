@@ -10,13 +10,14 @@ export const fetchComments = () => {
         },
     })
         .then((res) => {
+            console.log('fetchComments status:', res.status)
             if (!res.ok) {
                 throw new Error('Не удалось загрузить комментарии')
             }
             return res.json()
         })
         .then((data) => {
-            console.log('fetchComments response:', data.comments)
+            console.log('fetchComments raw response:', data)
             return data.comments.map((comment) => ({
                 id: comment.id,
                 name: comment.author?.name || 'Anonymous',
@@ -39,17 +40,22 @@ export const postComment = (text) => {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
         },
         body: JSON.stringify({ text }),
     }).then((res) => {
+        console.log('postComment status:', res.status, 'response:', res)
         if (!res.ok) {
-            if (res.status === 401) {
-                localStorage.removeItem('authToken')
-                localStorage.removeItem('userName')
-                throw new Error('Требуется авторизация')
-            }
-            throw new Error('Не удалось отправить комментарий')
+            return res.json().then((errorData) => {
+                console.error('postComment error:', errorData)
+                if (res.status === 401) {
+                    localStorage.removeItem('authToken')
+                    localStorage.removeItem('userName')
+                    throw new Error('Требуется авторизация')
+                }
+                throw new Error(
+                    errorData.error || 'Не удалось отправить комментарий',
+                )
+            })
         }
         return res.json()
     })
@@ -59,9 +65,7 @@ export const postComment = (text) => {
 export const loginUser = (login, password) => {
     return fetch(`${authHost}/login`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: {},
         body: JSON.stringify({ login, password }),
     }).then((res) => {
         if (!res.ok) {
@@ -77,9 +81,7 @@ export const loginUser = (login, password) => {
 export const registerUser = (login, name, password) => {
     return fetch(`${authHost}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: {},
         body: JSON.stringify({ login, name, password }),
     }).then((res) => {
         if (!res.ok) {
