@@ -16,15 +16,25 @@ export function initAddCommentListener(
     nameInput,
     addForm,
     loadingMessage,
+    token,
 ) {
     const addButton = document.querySelector('.add-form-button')
+    if (!addButton || !commentInput || !addForm || !loadingMessage) {
+        console.error('Не найдены элементы формы:', {
+            addButton,
+            commentInput,
+            addForm,
+            loadingMessage,
+        })
+        return
+    }
 
     const handlePostClick = async () => {
-        const name = nameInput.value.trim()
         const text = commentInput.value.trim()
+        console.log('Попытка добавить комментарий:', text)
 
-        if (name.length < 3 || text.length < 3) {
-            alert('Имя и комментарий должны быть не короче 3 символов')
+        if (text.length < 3) {
+            alert('Комментарий должен быть не короче 3 символов')
             return
         }
 
@@ -33,11 +43,11 @@ export function initAddCommentListener(
         addButton.disabled = true
 
         try {
-            await postComment(text, name)
+            await postComment(text, token)
             renderComments(commentList)
-            nameInput.value = ''
             commentInput.value = ''
         } catch (error) {
+            console.error('Ошибка при добавлении комментария:', error.message)
             if (error.message === 'Ошибка сервера') {
                 alert('Сервер сломался, попробуй позже')
                 handlePostClick()
@@ -52,9 +62,17 @@ export function initAddCommentListener(
     }
 
     addButton.addEventListener('click', handlePostClick)
+    console.log('Слушатель для добавления комментария инициализирован')
 }
 
 export function initListenerReplyToComment(commentList, commentInput) {
+    if (!commentInput) {
+        console.log(
+            'Поле ввода комментария отсутствует (пользователь не авторизован)',
+        )
+        return
+    }
+
     commentList.addEventListener('click', (event) => {
         const commentElement = event.target.closest('.comment')
         if (commentElement) {
@@ -101,14 +119,11 @@ export function initLikeListeners(commentList) {
 
             try {
                 await delay(2000)
-
-                // Обновляем лайк
                 comment.likes = comment.isLiked
                     ? comment.likes - 1
                     : comment.likes + 1
                 comment.isLiked = !comment.isLiked
                 comment.isLikeLoading = false
-
                 likeButton.classList.remove('animation')
                 renderComments(commentList)
             } catch (error) {

@@ -1,80 +1,162 @@
-import { comments } from './comments.js'
-import { getCurrentDateTime } from './utils.js'
+const commentsHost = 'https://wedev-api.sky.pro/api/v2/baranova-evgeniya'
+const authHost = 'https://wedev-api.sky.pro/api/user'
 
-const host = 'https://wedev-api.sky.pro/api/v1/baranova-evgeniya'
-
-export const fetchComments = async () => {
-    try {
-        const res = await fetch(`${host}/comments`, {
-            method: 'GET',
-        })
-
-        if (!res.ok) {
-            if (res.status >= 500 && res.status < 600) {
-                throw new Error('Ошибка сервера')
+// Получение списка комментариев
+export const fetchComments = () => {
+    return fetch(`${commentsHost}/comments`, {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache',
+        },
+    })
+        .then((res) => {
+            console.log('fetchComments status:', res.status)
+            if (!res.ok) {
+                throw new Error('Не удалось загрузить комментарии')
             }
-            throw new Error(`Ошибка при загрузке комментариев: ${res.status}`)
-        }
-
-        const responseData = await res.json()
-        const formattedComments = responseData.comments.map((comment) => ({
-            name: comment.author?.name || 'Anonymous',
-            date: comment.date || getCurrentDateTime(),
-            text: comment.text || '',
-            likes: comment.likes || 0,
-            isLiked: comment.isLiked || false,
-            isLikeLoading: false,
-        }))
-
-        comments.length = 0
-        comments.push(...formattedComments)
-        return comments
-    } catch (error) {
-        if (
-            error.name === 'TypeError' &&
-            error.message.includes('Failed to fetch')
-        ) {
-            throw new Error(
-                'Кажется, у вас сломался интернет, попробуйте позже',
-            )
-        }
-        throw error
-    }
+            return res.json()
+        })
+        .then((data) => {
+            console.log('fetchComments raw response:', data)
+            return data.comments.map((comment) => ({
+                id: comment.id,
+                name: comment.author?.name || 'Anonymous',
+                date: comment.date,
+                text: comment.text,
+                likes: comment.likes,
+                isLiked: comment.isLiked || false,
+            }))
+        })
 }
 
-export const postComment = async (text, name) => {
-    try {
-        const res = await fetch(`${host}/comments`, {
-            method: 'POST',
-            body: JSON.stringify({
-                text,
-                name,
-                forceError: true,
-            }),
-        })
-
-        if (!res.ok) {
-            if (res.status === 400) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || 'Некорректные данные')
-            }
-            if (res.status >= 500 && res.status < 600) {
-                throw new Error('Ошибка сервера')
-            }
-            throw new Error(`Ошибка сервера: ${res.status}`)
-        }
-
-        await res.json()
-        return await fetchComments()
-    } catch (error) {
-        if (
-            error.name === 'TypeError' &&
-            error.message.includes('Failed to fetch')
-        ) {
-            throw new Error(
-                'Кажется, у вас сломался интернет, попробуйте позже',
-            )
-        }
-        throw error
+// Добавление нового комментария
+export const postComment = (text) => {
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+        throw new Error('Требуется авторизация')
     }
+
+    return fetch(`${commentsHost}/comments`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+    }).then((res) => {
+        console.log('postComment status:', res.status, 'response:', res)
+        if (!res.ok) {
+            return res.json().then((errorData) => {
+                console.error('postComment error:', errorData)
+                if (res.status === 401) {
+                    localStorage.removeItem('authToken')
+                    localStorage.removeItem('userName')
+                    throw new Error('Требуется авторизация')
+                }
+                throw new Error(
+                    errorData.error || 'Не удалось отправить комментарий',
+                )
+            })
+        }
+        return res.json()
+    })
+}
+
+// Авторизация пользователя
+export const loginUser = (login, password) => {
+    return fetch(`${authHost}/login`, {
+        method: 'POST',
+        headers: {},
+        body: JSON.stringify({ login, password }),
+    }).then((res) => {
+        if (!res.ok) {
+            return res.json().then((errorData) => {
+                throw new Error(errorData.error || 'Неверный логин или пароль')
+            })
+        }
+        return res.json()
+    })
+}
+
+// Регистрация пользователя
+export const registerUser = (login, name, password) => {
+    return fetch(`${authHost}`, {
+        method: 'POST',
+        headers: {},
+        body: JSON.stringify({ login, name, password }),
+    }).then((res) => {
+        if (!res.ok) {
+            return res.json().then((errorData) => {
+                if (
+                    errorData.error &&
+                    errorData.error.includes('already exists')
+                ) {
+                    throw new Error(
+                        'Пользователь с таким логином уже существует',
+                    )
+                } else if (
+                    errorData.error &&
+                    errorData.error.includes('password')
+                ) {
+                    throw new Error(
+                        'Пароль слишком короткий или не соответствует требованиям',
+                    )
+                } else {
+                    throw new Error(errorData.error || 'Ошибка регистрации')
+                }
+            })
+        }
+        return res.json()
+    })
+}
+
+// Лайк комментария
+export const likeComment = (commentId) => {
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+        throw new Error('Требуется авторизация')
+    }
+
+    return fetch(`${commentsHost}/comments/${commentId}/toggle-like`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+        },
+    })
+        .then((res) => {
+            console.log(
+                'Like response status:',
+                res.status,
+                'Comment ID:',
+                commentId,
+            )
+            if (!res.ok) {
+                return res.text().then((text) => {
+                    try {
+                        const errorData = JSON.parse(text)
+                        if (res.status === 401) {
+                            throw new Error('Требуется авторизация')
+                        }
+                        throw new Error(
+                            errorData.error || 'Не удалось поставить лайк',
+                        )
+                    } catch (e) {
+                        throw new Error(
+                            'Сервер вернул некорректный ответ: ' +
+                                text.slice(0, 100),
+                        )
+                    }
+                })
+            }
+            return res.json()
+        })
+        .then((result) => {
+            console.log('likeComment response:', result)
+            return {
+                result: {
+                    likes: result.result?.likes || 0,
+                    isLiked: result.result?.isLiked || false,
+                },
+            }
+        })
 }
